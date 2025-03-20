@@ -1,0 +1,42 @@
+.foo {
+  background: url(bg.png);
+  width: 32px;
+  height: 60px;
+}
+.bar {
+  padding: 0 12px;
+  background: url("data:image/png;base64,im7v+AAAAGXRFWHRTb2Z0d2FyZ6PX5px/");
+}
+.foo {
+  width: 100px;
+}
+@media screen and (max-width: 500px) {
+  .foo {
+    width: 100px;
+  }
+}
+
+.foo {
+  width: 32px;
+  height: vh(60);
+}
+.foo {
+  border-top: 1px solid #aaa;
+  margin-left: -65px;
+}
+.foo {
+  width: 32px;
+  height: -1px;
+  height: vh(1);
+  height: vh(-1);
+  margin-top: vh(-1);
+  margin-left: vh(-20);
+}
+/* 
+ 
+.foo {
+  width: 32px;
+  // vw模式情况下 正常写法将全部转换成vw,如需要vh:写vh(数值)来进行vh的转换
+  height: vh(60);
+}
+ */
