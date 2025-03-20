@@ -1,6 +1,9 @@
-css 解析器为 lightningcss(rust_lib)<br>
-功能： 将 px 转换为 rem 或 vw/vh。<br>
-启动 -- cargo run<br>
+**功能： 将 px 转换为 rem 或 vw/vh。**<br>
+<br>
+**css解析器**为 lightningcss(rust_lib)<br>
+<br>
+**启动** -- cargo run<br>
+<br>
 注意事项:
 1. 媒体查询 @media screen and (max-width: 300px)的范围设置不进行单位转换，1px 的绝对值不进行单位转换，当然可以根据情况修改。
 2. 需要转换的 css 文件放入 css_files 文件夹中 。
