@@ -1,8 +1,7 @@
 **功能： 将 px 转换为 rem 或 vw/vh。**<br>
-<br>
 **css解析器**为 lightningcss(rust_lib)<br>
-<br>
-**启动** -- cargo run<br>
+**启动**  cargo run<br>
+**生成优化后的可执行程序**  cargo build --release<br>
 <br>
 注意事项:
 1. 媒体查询 @media screen and (max-width: 300px)的范围设置不进行单位转换，1px 的绝对值不进行单位转换，当然可以根据情况修改。
