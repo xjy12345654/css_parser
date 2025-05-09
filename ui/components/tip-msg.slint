@@ -1,0 +1,49 @@
+export component TipMsg {
+    in-out property <bool> opacity_flag: false;
+    in-out property <duration> msg_dutime:1000ms;
+    in-out property <duration> an_dutime: 200ms;
+    // in-out property <brush> background;
+    in-out property background <=> msg_wrap.background;
+    in-out property <bool> visibleval <=> msg_wrap.visible;
+    in-out property <string> textval;
+    in-out property <brush> color:#fff;
+    callback tip_msg_show();
+    tip_msg_show() => {
+        msg_wrap.visible = true;
+        root.opacity_flag = true;
+        hid_timer.running = true;
+    }
+    hid_timer := Timer {
+        interval: msg_dutime;
+        running: false;
+        triggered() => {
+            self.running = false;
+            opacity_flag = false;
+            hidvi_timer.running = true;
+        }
+    }
+
+    hidvi_timer := Timer {
+        interval: an_dutime;
+        running: false;
+        triggered() => {
+            self.running = false;
+            msg_wrap.visible = false;
+        }
+    }
+
+    msg_wrap := Rectangle {
+        visible: false;
+        height: 35px;
+        z: 3;
+        // background: @linear-gradient(90deg, #87eca6 0%, #31d882 50%, #16cf70 100%);
+        opacity: opacity_flag ? 1 : 0;
+        animate opacity { duration: an_dutime; }
+        border-radius: 6px;
+        Text {
+            text: textval;
+            font-size: 16px;
+            color: color;
+        }
+    }
+}
