@@ -17,17 +17,18 @@ struct Checklist{
 
 export component AppWindow inherits Window {
     width: 500px;
-    height: 300px;
+    height: 330px;
     default-font-size: 18px;
     default-font-family: "Helvetica,Verdana,Arial,sans-serif";
     icon: @image-url("./images/icon_css.png");
     title: "css转换器";
     // background: @linear-gradient(90deg, #2041a5 0%, #1f49c7 50%, #042EA7 100%);
     background: @linear-gradient(90deg, #4385e9 0%, #327ae6 50%, #1d69da 100%);
-    in-out property <int> counter: 42;
+    // in-out property <int> counter: 42;
     in-out property <string> be_fontsize: 50;
     in-out property <string> be_width: 1920;
     in-out property <string> be_height: 1080;
+    // in-out property <string> be_filespath: "";
     in-out property <bool> err_pop_flag: false;
     in-out property <bool> err_pop_opacity_flag: false;
     in-out property <bool> msg_pop_opacity_flag: false;
@@ -44,6 +45,11 @@ export component AppWindow inherits Window {
         value:"1",
         name:"convert_vw",
     }];
+    property <[Checklist]> errList:[
+        { id:"0", name:"erro1", value:"File path is not set" },
+        { id:"1", name:"erro2", value:"File path  not found" },
+        { id:"2", name:"erro3", value:"No CSS files found in the directory" }
+    ];
 
  
     // 错误弹窗timer
@@ -80,14 +86,28 @@ export component AppWindow inherits Window {
         root.msg_pop_opacity_flag = true;
         msg_pop_timer.running = true;
     }
-    callback msgerr_pop;
-    msgerr_pop => {
+    callback msgerr_pop(int);
+    msgerr_pop(err_type) => {
+        // if (err-type == 0) {
+            err_te.text = errList[err_type].value;
+        // }
         root.msgerr_pop_opacity_flag = true;
         msgerr_pop_timer.running = true;
     }
    
     // callback request-increase-value();
     callback btnclicked();
+    callback select_file();
+    callback flie_inputte(string);
+    flie_inputte(flie_path) => {
+        // debug(flie_path);
+        flie_input.text = flie_path;
+    }
+    callback getfilepath() -> string;
+    getfilepath() => {
+        return flie_input.text;
+    }
+    // flie_input
  
     // callback checkclicked(checklist:Checklist);
     // VerticalBox {
@@ -104,13 +124,14 @@ export component AppWindow inherits Window {
     // }
 
     VerticalLayout {
-        width: 60%;
+        width: 75%;
+        padding-top: 20px;
         alignment: center;
         Rectangle {
         // 成功消息提示
             Rectangle {
                 y: -50px;
-                height: 40px;
+                height: 35px;
                 z: 3;
                 // background: rgba(255,255,255,0.7);
                 background: @linear-gradient(90deg, #87eca6 0%, #31d882 50%, #16cf70 100%);
@@ -126,17 +147,17 @@ export component AppWindow inherits Window {
             //错误消息提示
             Rectangle {
                 y: -50px;
-                height: 40px;
+                height: 35px;
                 z: 3;
                 // background: rgba(255,255,255,0.7);
                 background: @linear-gradient(90deg, #ff6666 0%, #ff4d4d 50%, #d90000 100%);
                 opacity: msgerr_pop_opacity_flag ? 1 : 0;
                 animate opacity { duration: an_dutime; }
                 border-radius: 6px;
-                Text {
-                    text: "Path not found !";
+                err_te := Text {
+                    // text: "Path not found !";
                     font-size: 16px;
-                    color: #41418a;
+                    color: #f0f0f0;
                 }
             }
         // 窗口内容
@@ -144,17 +165,27 @@ export component AppWindow inherits Window {
 
                 if selected_index == "0":VerticalLayout {
                     HorizontalLayout {
-                        alignment: center;
+                        // alignment: center;
                         spacing: 10px;
                         Rectangle {
                             min-width: 150px;
-                            Text {
-                                text: "Font benchmark:";
-                                color: #fff;
+                            // background: rebeccapurple;
+
+                            HorizontalLayout {
+                                alignment: start;
+                                VerticalLayout {
+                                    alignment: center;
+                                    Text {
+                                        text: "Font benchmark:";
+                                        color: #fff;
+                                    }
+                                }
                             }
                         }
 
                         Rectangle {
+                            horizontal-stretch: 1;
+                            // background: orange;
                             LineEdit {
                                 width: 100%;
                                 placeholder-text: "font_size_num";
@@ -177,9 +208,15 @@ export component AppWindow inherits Window {
                         Rectangle {
                             min-width: 150px;
                             // background: rebeccapurple;
-                            Text {
-                                text: "Width benchmark:";
-                                color: #fff;
+                            HorizontalLayout {
+                                alignment: start;
+                                VerticalLayout {
+                                    alignment: center;
+                                    Text {
+                                        text: "Width benchmark:";
+                                        color: #fff;
+                                    }
+                                }
                             }
                         }
 
@@ -202,15 +239,21 @@ export component AppWindow inherits Window {
                     HorizontalLayout {
                         spacing: 10px;
                         Rectangle {
-                            min-width: 150px;
+                            width: 150px;
                             // background: rebeccapurple;
-                            Text {
-                                text: "Height benchmark:";
-                                color: #fff;
+                            HorizontalLayout {
+                                VerticalLayout {
+                                    alignment: center;
+                                    Text {
+                                        text: "Height benchmark:";
+                                        color: #fff;
+                                    }
+                                }
                             }
                         }
 
                         Rectangle {
+                            horizontal-stretch: 1;
                             LineEdit {
                                 width: 100%;
                                 placeholder-text: "height_num";
@@ -226,6 +269,76 @@ export component AppWindow inherits Window {
                         padding-bottom: 15px;
                     }
                 }
+
+                VerticalLayout {
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Rectangle {
+                            min-width: 150px;
+                            // background: rebeccapurple;
+                            HorizontalLayout {
+                                alignment: start;
+                                VerticalLayout {
+                                    alignment: center;
+                                    Text {
+                                        text: "Files path:";
+                                        color: #fff;
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: 130px;
+                            // background: orange;
+                            // horizontal-stretch: 1;
+                          flie_input := LineEdit {
+                                width: 100%;
+                                placeholder-text: "files_path";
+                                // text: root.be_filespath;
+                                text: "";
+                                font-size: 14px;
+                                // accepted => { debug(root.be_filespath) }
+                                edited(text) => {
+                                    // root.be_filespath = text;
+                                    flie_input.text = text;
+                                    // debug("text_"+text);
+                                    // debug("text2_"+root.be_filespath)
+                                }
+                            }
+
+                            height: 30px;
+                        }
+
+                        Rectangle {
+                            horizontal-stretch: 1;
+                            border-radius: 3px;
+                            VerticalLayout {
+                                padding-left: 4px;
+                                padding-right: 4px;
+                                alignment: center;
+                                HorizontalLayout {
+                                    alignment: center;
+                                    Text {
+                                        text: "choose";
+                                        color: #fff;
+                                    }
+                                }
+                            }
+
+                            background: select_file.pressed ? #1f096d : @linear-gradient(90deg, #1552fa, #4715fa);
+
+                            select_file := TouchArea {
+                                mouse-cursor: pointer;
+                                clicked => {
+                                    root.select_file();
+                                }
+                            }
+                        }
+
+                        padding-bottom: 15px;
+                    }
+                }
             }
         }
        //切换内容    
@@ -235,6 +348,7 @@ export component AppWindow inherits Window {
                 height: 30px;
                 // background: #b2ce93;
                 HorizontalLayout {
+                    spacing: 10px;
                     for item[index] in checklist: Rectangle {
                         HorizontalLayout {
                             alignment: center;
@@ -315,6 +429,7 @@ export component AppWindow inherits Window {
                         }
 
                         TouchArea {
+                            mouse-cursor: pointer;
                             clicked => {
                                 // debug(item.value);
                                 // selected_index = index;
@@ -337,11 +452,11 @@ export component AppWindow inherits Window {
                         color: #fff;
                     }
                 
-                    // background: area.pressed ? #fff : orange;
                     // background: area.pressed ? #2559d1 : @linear-gradient(90deg,   #4d8be7 , #2663F2);
                     background: area.pressed ? #1f096d : @linear-gradient(90deg, #1552fa, #4715fa);
                     animate background { duration: an_dutime; }
                     area := TouchArea {
+                        mouse-cursor: pointer;
                         clicked => {
                             if (root.selected_index == "0") {
                                 if (root.be_fontsize.is-float()) {
@@ -365,6 +480,7 @@ export component AppWindow inherits Window {
                                     root.err_pop_flag = true;
                                 }
                             }
+                            flie_input.clear-focus();
                         }
                     }
                 }
