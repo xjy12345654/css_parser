@@ -1,0 +1,66 @@
+ 
+import { List } from "./types/types.slint";
+
+export component CheckGroup {
+    in-out property <duration> an_dutime: 200ms;
+    in-out property <string> selected_index;
+    in-out property <[List]> checklist;
+    callback clicked(string);
+    HorizontalLayout {
+        padding-bottom: 15px;
+        Rectangle {
+            height: 30px;
+            HorizontalLayout {
+                spacing: 10px;
+                for item[index] in checklist: Rectangle {
+                    HorizontalLayout {
+                        alignment: center;
+                        VerticalLayout {
+                            padding-right: 10px;
+                            alignment: center;
+                            Text {
+                                text: item.name;
+                                font-size: 16px;
+                                color: #fff;
+                            }
+                        }
+
+                        VerticalLayout {
+                            alignment: center;
+                            Rectangle {
+                                width: 20px;
+                                height: 20px;
+                                Image {
+                                    width: 100%;
+                                    height: 100%;
+                                    // source: index == selected_index ? @image-url("./images/checked.png") : @image-url("./images/no_check.png");
+                                    source: @image-url("../images/no_check.png");
+                                    Image {
+                                        width: 100%;
+                                        height: 100%;
+                                        opacity: 0;
+                                        animate opacity { duration: an_dutime; }
+                                        states [
+                                            check_active when item.value == root.selected_index: {
+                                                source: @image-url("../images/checked.png");
+                                                opacity: 1;
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    TouchArea {
+                        mouse-cursor: pointer;
+                        clicked => {
+                            root.clicked(item.value);
+                            // debug("chhild_:"+selected_index);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
