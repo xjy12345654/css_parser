@@ -43,7 +43,7 @@ impl AppController {
         let file_path: String = ui.invoke_getfilepath().into();
         // println!("file_path_{}", file_path);
         if file_path.is_empty() {
-            ui.invoke_msgerr_pop(0);
+            ui.invoke_tip_msg(1, 1);
             return;
         }
 
@@ -75,17 +75,17 @@ impl AppController {
         let res = read_file(pa_option);
         match res {
             Ok(()) => {
-                ui.invoke_msgsuc_pop();
+                ui.invoke_tip_msg(0, 0);
             }
             Err(e) => {
                 match e.downcast_ref::<NoCssFilesFound>() {
                     Some(_) => {
-                        ui.invoke_msgerr_pop(2);
+                        ui.invoke_tip_msg(1, 3);
                         return;
                     }
                     _ => {}
                 }
-                ui.invoke_msgerr_pop(1);
+                ui.invoke_tip_msg(1, 2);
             }
         };
     }
