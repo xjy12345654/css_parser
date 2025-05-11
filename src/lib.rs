@@ -1,7 +1,9 @@
 use std::{
     error::Error,
+    fmt::Display,
     fs::{self, File},
     io::{Read, Write},
+    path::Path,
 };
 
 use lightningcss::{
@@ -21,6 +23,7 @@ pub struct PaOptions<'a> {
     pub be_width: Option<f32>,
     pub be_height: Option<f32>,
     pub checktype: Option<&'a str>,
+    pub file_path: Option<&'a str>,
 }
 #[derive(Debug)]
 struct MyVisitor<'a> {
@@ -180,68 +183,112 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
             }
         }
 
-        // if pa_option.checktype.unwrap() == "0"{
-        //     if !self.in_media_condition{
-        //         match length {
-        //             LengthValue::Px(px) => {
-        //                 let px = *px;
-        //                 if px.abs() != 1.0 {
-        //                     *length = LengthValue::Rem(px / font_value);
-        //                 }
-        //             }
-        //             _ => {}
-        //         }
-        //     }
-        // } else if pa_option.checktype.unwrap() == "1"{
-        //     if !self.in_media_condition {
-        //         match length {
-        //             LengthValue::Px(px) => {
-        //                 let px = *px;
-        //                 if px.abs() != 1.0 {
-        //                     let result = (px / be_width * 100.0 * 1000.0).round() / 1000.0;
-        //                     *length = LengthValue::Vw(result);
-        //                 }
-        //             }
-        //             _ => {}
-        //         }
-        //     }
-        // }
-
         Ok(())
     }
 }
 
-pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
-    let current_dir = std::env::current_dir()?;
-    let file_path = current_dir.join("css_files");
-    for file_item in fs::read_dir(&file_path)? {
-        let file_item = file_item?.path();
-        let file_name = file_item.file_stem().unwrap().to_str().unwrap();
-        // println!("file_item {:?}",file_item);
-        if file_name != ".css" && !file_name.contains("_conv") {
-            let mut file = File::open(&file_item)?;
-            let mut content = String::new();
-            file.read_to_string(&mut content)?;
-            let content = unit_analysis_change(pa_option, &content);
-            let css_unit = match pa_option.checktype.unwrap_or("_") {
-                "0" => "rem",
-                "1" => "vw",
-                _ => "_",
-            };
+// pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
+//     // let current_dir = std::env::current_dir()?;
+//     // let file_path = current_dir.join("css_files");
+//     let file_path = pa_option.file_path.unwrap_or("");
+//      println!("file_path_{}",file_path);
+//     for file_item in fs::read_dir(&file_path)? {
+//         println!("file_item_{:?}",file_item);
+//         let file_item = file_item?.path();
+//         let file_name = file_item.file_stem().unwrap().to_str().unwrap();
+//         println!("file_name {:?}",file_name);
+//         if file_name != ".css" && !file_name.contains("_conv") {
+//             let mut file = File::open(&file_item)?;
+//             let mut content = String::new();
+//             file.read_to_string(&mut content)?;
+//             let content = unit_analysis_change(pa_option, &content);
+//             let css_unit = match pa_option.checktype.unwrap_or("_") {
+//                 "0" => "rem",
+//                 "1" => "vw",
+//                 _ => "_",
+//             };
 
-            let new_name = format!("{}{}{}{}{}", file_name, "_", "conv", "_", css_unit);
-            let new_file_path = format!(
-                "{}{}{}{}",
-                file_path.to_str().unwrap(),
-                "\\",
-                new_name,
-                ".css"
-            );
-            let mut new_file = File::create(new_file_path)?;
-            new_file.write_all(content.as_bytes())?;
+//             // let new_name = format!("{}{}{}{}{}", file_name, "_", "conv", "_", css_unit);
+//             // let new_file_path = format!("{}{}{}{}", file_path, "\\", new_name, ".css");
+//             let new_name = format!("{}_conv_{}", file_name, css_unit);
+//             let new_file_path = Path::new(file_path).join(&new_name).with_extension("css");
+//             let mut new_file = File::create(new_file_path)?;
+//             new_file.write_all(content.as_bytes())?;
+//         }
+//     }
+
+//     Ok(())
+// }
+#[derive(Debug)]
+pub struct NoCssFilesFound;
+impl Display for NoCssFilesFound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "No CSS files found in the directory")
+    }
+}
+impl Error for NoCssFilesFound {}
+
+pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
+    let file_path = pa_option.file_path.unwrap_or("");
+    let mut css_files_processed = false;
+    for file_item in fs::read_dir(&file_path)? {
+        // println!("file_item_{:?}", file_item);
+        let file_item = file_item?.path();
+        if file_item.is_dir() {
+            // 递归处理子目录
+            let mut sub_options = pa_option.clone();
+            let file_path = file_item.to_str().unwrap().to_string();
+            // println!("file_path_{}", file_path);
+            sub_options.file_path = Some(&file_path);
+
+            // 递归调用read_file并合并结果
+            match read_file(sub_options) {
+                Ok(_) => css_files_processed = true,
+                Err(e) => {
+                    // 如果子目录中没有CSS文件，继续处理其他项
+                    if e.is::<NoCssFilesFound>() {
+                        continue;
+                    }
+                    // else {
+                    //     return Err(e);
+                    // }
+                    return Err(e);
+                }
+            }
+        } else if file_item.is_file() {
+            if let Some(ext) = file_item.extension() {
+                if ext.to_str() == Some("css") {
+                    // let file_name = file_item.file_stem().unwrap().to_str().unwrap();
+                    let file_name = file_item
+                        .file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or_default();
+                    if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
+                        let mut file = File::open(&file_item)?;
+                        let mut content = String::new();
+                        file.read_to_string(&mut content)?;
+                        let content = unit_analysis_change(pa_option, &content);
+                        let css_unit = match pa_option.checktype.unwrap_or("_") {
+                            "0" => "rem",
+                            "1" => "vw",
+                            _ => "_",
+                        };
+                        let new_name = format!("{}_conv_{}", file_name, css_unit);
+                        let new_file_path =
+                            Path::new(file_path).join(&new_name).with_extension("css");
+
+                        // println!("new_file_path_{:?}", new_file_path);
+                        let mut new_file = File::create(new_file_path)?;
+                        new_file.write_all(content.as_bytes())?;
+                        css_files_processed = true;
+                    }
+                }
+            }
         }
     }
-
+    if !css_files_processed {
+        return Err(Box::new(NoCssFilesFound));
+    }
     Ok(())
 }
 
