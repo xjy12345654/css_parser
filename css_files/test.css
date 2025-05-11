@@ -1,0 +1,368 @@
+/* 111 */
+@font-face {
+	font-family: PingFangSC-Regular;
+	/* src: url('../fonts/PingFang-Jian-ChangGuiTi-2.ttf'); */
+	src: url('../../PingFang-Jian-ChangGuiTi-2.ttf');
+
+}
+
+body,
+p,
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-family: "PingFangSC-Regular";
+}
+
+
+.icon_back,
+body {
+	color: #333;
+	line-height: 0.44rem;
+}
+
+body,
+.mui-content {
+	background-color: #f7f7f7;
+}
+
+.mui-bar.mui-bar-nav {
+	box-shadow: none;
+	background-color: #fff;
+	border-bottom: 1px solid #E5E5E5;
+}
+
+input::placeholder {
+	font-size: 0.3rem;
+	color: #aaa;
+}
+
+.mui-btn-blue {
+	color: #fff;
+	border: 1px solid #00b893;
+	background-color: #00b893;
+}
+
+.mui-title {
+	color: #333;
+}
+
+.mui-content {
+	padding-bottom: 50px;
+}
+
+.mui-pull-bottom-pocket {
+	margin-top: 20px;
+	position: relative;
+}
+
+.mui-pull-bottom-pocket,
+.mui-pull-top-pocket {
+	visibility: visible;
+	overflow: visible;
+}
+
+.mui-pull-caption {
+	font-size: 12px;
+	color: #fff;
+	font-weight: normal;
+	visibility: visible;
+}
+
+.mui-pull-bottom-pocket::after {
+	content: ">";
+	position: absolute;
+	left: 50%;
+	top: -8px;
+	color: #fff;
+	transform: translateX(-50%) rotate(-90deg) scale(0.6, 1);
+}
+
+/* 个人退费明细 */
+.mui-bar-nav~.pufihead {
+	margin-top: 44px;
+}
+
+.pufihead {
+	position: relative;
+	z-index: 10;
+}
+
+.fiheimg {
+	width: 100%;
+	vertical-align: bottom;
+}
+
+.pufiheadcon {
+	position: absolute;
+	left: 20px;
+	top: 20px;
+	right: 160px;
+	bottom: 20px;
+}
+
+.carite4 {
+	font-size: 14px;
+	margin-top: 38px;
+	color: #fff;
+}
+
+.pufihecard {
+	display: flex;
+}
+
+.headimg {
+	width: 35px;
+	height: 35px;
+	vertical-align: bottom;
+}
+
+.pufihecari {
+	font-size: 13px;
+	margin-left: 10px;
+}
+
+.carite1 {
+	font-size: 19px;
+}
+
+.carite2 {
+	margin: 4px 0;
+}
+
+.carite3 .fo1 {
+	font-size: 30px;
+	font-weight: bold;
+}
+
+.c1 {
+	color: #ffd979;
+}
+
+.c2 {
+	color: #00B893;
+}
+
+.c3 {
+	color: #aaa;
+}
+
+.mui-scroll-wrapper.pufilist,
+.mui-scroll-wrapper.pufilist2 {
+	top: 244px;
+	padding-top: 0;
+	background-color: #00B893;
+}
+
+.corderlist {
+	font-size: 13px;
+	padding: 0 13px;
+	background-color: transparent;
+}
+
+.corderlist::after,
+.corderlist::before {
+	height: 0;
+}
+
+.corderlist .mui-table-view-cell {
+	padding: 0.4rem;
+	border-radius: 0.2rem;
+	margin-bottom: 0.24rem;
+}
+
+.corderlist .haitem {
+	background-color: #fff;
+	margin: -0.4rem !important;
+}
+
+.flebox {
+	display: flex;
+	word-break: break-all;
+	white-space: normal;
+}
+
+.haicebox {
+	display: flex;
+}
+
+.haiceboxle,
+.haice {
+	flex: 1;
+	overflow: hidden;
+}
+
+.corderlist .haile,
+.corderlist .haile2,
+.corderlist .haile3 {
+	width: 45px;
+	height: 45px;
+	background-image: url(../images/rei1.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+	margin-right: 18px;
+}
+
+
+.corderlist .haile2 {
+	background-image: url(../images/rei2.png);
+}
+
+.corderlist .haile3 {
+	width: 35px;
+	height: 35px;
+	background-image: none;
+}
+
+.haile3 .haile3img {
+	width: 100%;
+	height: 100%;
+}
+
+.haicete3 {
+	font-size: 12px;
+}
+
+.haicete1 {
+	font-size: 15px;
+	font-weight: bold;
+
+}
+
+.haicete2 {
+	color: #999;
+
+}
+
+.hairite1 .fo2 {
+	font-size: 18px;
+	color: #e64545;
+}
+
+.hairite1 {
+	color: #aaa;
+	width: 60px;
+	text-align: right;
+}
+
+.par10 {
+	padding-right: 10px;
+}
+
+/* 人员统计 */
+
+
+.treelistti {
+	width: 100%;
+	position: absolute;
+	bottom: -30px;
+	padding: 0 13px;
+}
+
+.treelistti {
+	font-size: 0.3rem;
+	line-height: 0.4rem;
+	background-color: #00B893;
+}
+
+.treelistti .glli {
+	padding: 0.26rem 0.4rem;
+	background-color: #fff;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.treelistti .mui-icon {
+	font-size: 0.34rem;
+	color: #aaaaaa;
+}
+
+.treelistti .glliri {
+	font-size: 0.28rem;
+}
+
+.treelistti .gllirite1 {
+	position: relative;
+	top: 1px;
+}
+
+.glliitem {
+	display: flex;
+	justify-content: space-between;
+}
+
+.mui-scroll-wrapper.pufilist2 {
+	top: 0;
+}
+
+.pufilist2 .mui-scroll {
+	padding: 0 13px;
+}
+
+.corderlistwrap {
+	background-color: #fff;
+	padding: 285px 0 15px;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+	overflow: hidden;
+}
+
+.pufilist2 .corderc1list {
+	background-color: #fff;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
+
+.corderlist .corderli {
+	border-radius: 0;
+	margin-bottom: 0;
+}
+
+.corderlist .corderli {
+	padding: 0.1rem 0.4rem;
+}
+
+.corderli .haitem {
+	margin: -0.1rem -0.4rem !important;
+}
+
+.corderli .flebox {
+	align-items: center;
+}
+
+.linecon {
+	display: flex;
+	align-items: center;
+	padding: 0 18px;
+	font-weight: bold;
+	color: #aaa;
+}
+
+.linri {
+	flex: 1;
+	overflow: hidden;
+	height: 1px;
+	margin-left: 5px;
+	background-color: #e9e9e9;
+}
+
+.corderli::after {
+	height: 0;
+}
+
+.corderli .haicete1 {
+	font-weight: normal;
+	margin-right: 10px;
+}
+
+.corderli .hairi {
+	font-size: 13px;
+	color: #aaa;
+}
+
+.corderli .hairi .hairic1 {
+	font-size: 15px;
+	font-weight: bold;
+	color: #e64545;
+}
