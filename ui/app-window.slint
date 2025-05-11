@@ -25,6 +25,7 @@ export component AppWindow inherits Window {
     in-out property <string> be_fontsize: 50;
     in-out property <string> be_width: 1920;
     in-out property <string> be_height: 1080;
+    // in-out property <string> be_filespath: "";
     in-out property <bool> err_pop_flag: false;
     in-out property <bool> err_pop_opacity_flag: false;
     in-out property <duration> an_dutime: 200ms;
@@ -76,7 +77,6 @@ export component AppWindow inherits Window {
     getfilepath() => {
         return flie_input.text;
     }
-
     // VerticalBox {
     //     Text {
     //         text: "Counter: \{root.counter}";
