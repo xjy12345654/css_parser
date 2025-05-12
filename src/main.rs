@@ -6,7 +6,6 @@ mod app;
 use crate::app::AppController;
 
 fn main() -> Result<(), Box<dyn Error>> {
- 
     // let ui = AppWindow::new()?;
     // let window = ui.window();
     // println!("{:?}", window.position());
@@ -41,12 +40,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     //         }
     //     });
 
-    
-
     // ui.run()?;
     // Ok(())
     let app = AppController::new()?;
     app.setup_event_handlers();
     app.run()
-   
 }
