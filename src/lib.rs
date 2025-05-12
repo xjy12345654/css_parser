@@ -238,9 +238,7 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
             // 递归处理子目录
             let mut sub_options = pa_option.clone();
             let file_path = file_item.to_str().unwrap().to_string();
-            // println!("file_path_{}", file_path);
             sub_options.file_path = Some(&file_path);
-
             // 递归调用read_file并合并结果
             match read_file(sub_options) {
                 Ok(_) => css_files_processed = true,

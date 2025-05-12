@@ -11,19 +11,19 @@ export component TipMsg {
     tip_msg_show() => {
         msg_wrap.visible = true;
         root.opacity_flag = true;
-        hid_timer.running = true;
+        hide_timer.running = true;
     }
-    hid_timer := Timer {
+    hide_timer := Timer {
         interval: msg_dutime;
         running: false;
         triggered() => {
             self.running = false;
             opacity_flag = false;
-            hidvi_timer.running = true;
+            hidevi_timer.running = true;
         }
     }
 
-    hidvi_timer := Timer {
+    hidevi_timer := Timer {
         interval: an_dutime;
         running: false;
         triggered() => {

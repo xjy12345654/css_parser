@@ -12,6 +12,7 @@ component my_button inherits Rectangle {
 import { List } from "./components/types/types.slint";
 import { CheckGroup } from "./components/check-group.slint";
 import { TipMsg } from "./components/tip-msg.slint";
+import { Dailog } from "./components/dailog.slint";
 export component AppWindow inherits Window {
     width: 500px;
     height: 330px;
@@ -26,8 +27,8 @@ export component AppWindow inherits Window {
     in-out property <string> be_width: 1920;
     in-out property <string> be_height: 1080;
     // in-out property <string> be_filespath: "";
-    in-out property <bool> err_pop_flag: false;
-    in-out property <bool> err_pop_opacity_flag: false;
+    // in-out property <bool> err_pop_flag: false;
+    // in-out property <bool> err_pop_opacity_flag: false;
     in-out property <duration> an_dutime: 200ms;
     in-out property <duration> msg_dutime: 2000ms;
     in-out property <string> selected_index: "0";
@@ -40,14 +41,14 @@ export component AppWindow inherits Window {
 
  
     // 错误弹窗timer
-    err_pop_timer := Timer {
-        interval: an_dutime;
-        running: false;
-        triggered() => {
-            self.running = false;
-            root.err_pop_flag = false;
-        }
-    }
+    // err_pop_timer := Timer {
+    //     interval: an_dutime;
+    //     running: false;
+    //     triggered() => {
+    //         self.running = false;
+    //         root.err_pop_flag = false;
+    //     }
+    // }
   /**
    * 触发提示消息的回调函数
      @param int 错误类型，0 表示成功提示，其他值表示错误提示
@@ -89,6 +90,7 @@ export component AppWindow inherits Window {
     //         }
     //     }
     // }
+    
 
     VerticalLayout {
         width: 75%;
@@ -114,6 +116,8 @@ export component AppWindow inherits Window {
                 an_dutime: an_dutime;
                 color: #f0f0f0;
             }
+
+        
     
         // 窗口内容
         VerticalLayout {
@@ -140,7 +144,7 @@ export component AppWindow inherits Window {
                         Rectangle {
                             horizontal-stretch: 1;
                             // background: orange;
-                            LineEdit {
+                   fo_input := LineEdit {
                                 width: 100%;
                                 placeholder-text: "font_size_num";
                                 text: "\{root.be_fontsize}";
@@ -174,7 +178,7 @@ export component AppWindow inherits Window {
                         }
 
                         Rectangle {
-                            LineEdit {
+                            width_inupt := LineEdit {
                                 width: 100%;
                                 placeholder-text: "width_num";
                                 text: "\{root.be_width}";
@@ -207,7 +211,7 @@ export component AppWindow inherits Window {
 
                         Rectangle {
                             horizontal-stretch: 1;
-                            LineEdit {
+                            height_input := LineEdit {
                                 width: 100%;
                                 placeholder-text: "height_num";
                                 text: "\{root.be_height}";
@@ -328,18 +332,22 @@ export component AppWindow inherits Window {
                                     root.btnclicked();
                                 } else {
                                     // debug("请输入有效数字");
-                                    root.err_pop_opacity_flag = true;
-                                    root.err_pop_flag = true;
+                                    // root.err_pop_opacity_flag = true;
+                                    // root.err_pop_flag = true;
+                                    err_dailog.show();
                                 }
                             } else {
                                 if (root.be_width.is-float() && root.be_height.is-float()) {
                                     root.btnclicked();
                                 } else {
                                     // debug("请输入有效数字");
-                                    root.err_pop_opacity_flag = true;
-                                    root.err_pop_flag = true;
+                                    // root.err_pop_opacity_flag = true;
+                                    // root.err_pop_flag = true;
+                                    err_dailog.show();
                                 }
                             }
+                            // font_input
+                            
                             flie_input.clear-focus();
                         }
                     }
@@ -349,60 +357,8 @@ export component AppWindow inherits Window {
     }
 
    //输入无效数字的提示弹窗 
-   Rectangle {
-        visible: {
-            err_pop_flag
-        };
-        z: 2;
-        background: rgba(0,0,0,0.7);
-        opacity: err_pop_opacity_flag ? 1 : 0;
-        animate opacity { duration: an_dutime; }
-        TouchArea { }
-
-        VerticalLayout {
-            width: 300px;
-            alignment: center;
-            Rectangle {
-                background: rgba(255,255,255,0.8);
-                border-radius: 6px;
-                VerticalLayout {
-                    padding: 20px;
-                    HorizontalLayout {
-                        Rectangle {
-                            Text {
-                                text: "please input number!";
-                                font-size: 20px;
-                                color: #333;
-                            }
-                        }
-                    }
-
-                    HorizontalLayout {
-                        padding-top: 20px;
-                        alignment: center;
-                        Rectangle {
-                            width: 150px;
-                            height: 40px;
-                            // background: #2E68ED;
-                            background: close_btn.pressed ? #1f096d : @linear-gradient(90deg, #1552fa, #4715fa);
-                            animate background { duration: an_dutime; }
-                            border-radius: 5px;
-                            Text {
-                                text: "close";
-                                font-size: 15px;
-                                color: #fff;
-                            }
-
-                            close_btn := TouchArea {
-                                clicked => {
-                                    root.err_pop_opacity_flag = false;
-                                    err_pop_timer.running = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    err_dailog := Dailog {
+        context_text: "please input number!";
+        an_dutime: an_dutime;
     }
 }
