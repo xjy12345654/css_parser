@@ -2,7 +2,7 @@
 
 ## 🌟 Features | 核心功能
 
-**Convert `px` to `rem` or `vw/vh` with CSS parsing**  
+**Convert px to rem or vw/vh by parsing CSS files**  
 **解析 CSS 文件，实现 px 与 rem/vw/vh 单位转换**
 
 ![Preview](./ui/images/home.png)
