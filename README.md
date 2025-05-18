@@ -50,9 +50,9 @@ cargo build --release
 ```css
 /* Explicit vh unit specification | 显式指定 vh 单位 */
 .element {
-  width: 160px; /* Auto-convert to vw  | 自动转换为 vw */
-  height: vh(60); /* convert to vw     | 转换为 vh */
-  margin: 12px; /*  Auto-convert to vw | 自动转换为 vw */
+  width: 160px;   /* Auto-convert to vw  | 自动转换为 vw */
+  height: vh(60); /* convert to vh     | 转换为 vh */
+  margin: 12px;   /*  Auto-convert to vw | 自动转换为 vw */
 }
 ```
 
