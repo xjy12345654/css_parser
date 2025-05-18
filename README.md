@@ -1,35 +1,11 @@
-<div align="center">
-
 # 📐 CSS Unit Converter | CSS 单位转换工具
 
-![Rust Version](1.85)
-![Slint GUI](1.10.0)
-![License](https://img.shields.io/badge/License-MIT-green)
+## 🌟 Features | 核心功能
 
 **Convert `px` to `rem` or `vw/vh` with CSS parsing**  
 **解析 CSS 文件，实现 px 与 rem/vw/vh 单位转换**
 
 ![Preview](./ui/images/home.png)
-
-</div>
-
----
-
-## 🌟 Features | 核心功能
-
-- **Dual Mode Conversion**  
-  **双模式转换**  
-  Support `px` ->`rem` and `px`-> `vw/vh` conversions based on viewport size  
-  支持根据视口尺寸进行 `px` 与 `rem` 或 `vw/vh` 单位转换
-
-- ** CSS Parsing**  
-  ** CSS 解析**  
-  Powered by [lightningcss](https://github.com/parcel-bundler/lightningcss) for accurate CSS syntax analysis  
-  基于高性能 lightningcss 实现精准语法解析
-
-- **GUI**  
-  Built with modern Slint framework for cross-platform compatibility  
-  使用 Slint 框架构建
 
 ---
 
@@ -37,8 +13,11 @@
 
 ### Prerequisites | 环境要求
 
-- Rust 1.85+ ([Installation Guide](https://www.rust-lang.org/tools/install))
-- Cargo package manager
+| Category       | Technology   | Version   |
+| -------------- | ------------ | --------- |
+| **Language**   | Rust         | `1.85+`   |
+| **GUI**        | Slint        | `1.10.0+` |
+| **CSS Parser** | LightningCSS | `1.0.0+`  |
 
 ### Installation | 安装步骤
 
@@ -59,10 +38,10 @@ cargo build --release
 
 ### 📂 File Naming Convention | 文件命名规则
 
-| Pattern        | Behavior              | 说明            |
-| -------------- | --------------------- | --------------- |
-| `*_conv_rem.*` | Skip rem conversion   | 跳过 rem 转换   |
-| `*_conv_vw.*`  | Skip vw/vh conversion | 跳过 vw/vh 转换 |
+| Pattern          | Behavior              | 说明            |
+| ---------------- | --------------------- | --------------- |
+| `*_conv_rem.css` | Skip rem conversion   | 跳过 rem 转换   |
+| `*_conv_vw.css`  | Skip vw/vh conversion | 跳过 vw/vh 转换 |
 
 ---
 
@@ -115,3 +94,5 @@ css_parser/
 ├── build.rs            # 🔨 Build script | 构建脚本
 └── Cargo.toml          # 📦 Dependencies config | 依赖配置
 ```
+
+![License](https://img.shields.io/badge/License-MIT-green)
