@@ -50,9 +50,9 @@ cargo build --release
 ```css
 /* Explicit vh unit specification | 显式指定 vh 单位 */
 .element {
-  width: 160px; /* Auto-convert to vw | 自动转换为 vw */
-  height: vh(60); /* convert to vw 👉 转换为 vh */
-  margin: 12px; /*  Auto-convert to vw  | 转换为 vw */
+  width: 160px; /* Auto-convert to vw  | 自动转换为 vw */
+  height: vh(60); /* convert to vw     | 转换为 vh */
+  margin: 12px; /*  Auto-convert to vw | 自动转换为 vw */
 }
 ```
 
@@ -60,24 +60,30 @@ cargo build --release
 
 ### 📱 Media Query Handling | 媒体查询规则
 
-媒体查询规则
-
 ```css
 @media screen and (max-width: 300px) {
   /* Values in this scope remain unchanged | 此区域内的值保持原单位 */
-  .box {
-    border: 1px solid #000; /* 🚫 No conversion | 不进行单位转换 */
-  }
+  .box {...}
 }
 /* 
 Pixel values in media queries will NOT be converted
 媒体查询中的像素值保留原单位
+
+*/
+```
+###  1px Special Cases | 1px 处理规则
+```css
+ .box {
+    border: 1px solid #000; /* 🚫 No conversion | 不进行单位转换 */
+  }
+/* 
 Absolute Values
 绝对值处理
 1px values are preserved by default
 默认保留 1px 绝对值
 */
 ```
+
 
 ## 🗂 Project Structure | 项目结构
 
