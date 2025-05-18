@@ -3,6 +3,8 @@
 **GUI**: Slint 1.10.0<br>
 **cssparser**: lightningcss(rust_lib)<br>
 
+![图片描述](./ui/images/home.png)
+
 **编译**需安装Rust开发环境<br>
 **启动**cargo run<br>
 **生成优化后的可执行程序**  cargo build --release<br>
