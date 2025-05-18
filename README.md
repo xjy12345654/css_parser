@@ -51,15 +51,13 @@ cargo build --release
 /* Explicit vh unit specification | 显式指定 vh 单位 */
 .element {
   width: 160px;   /* Auto-convert to vw  | 自动转换为 vw */
-  height: vh(60); /* convert to vh     | 转换为 vh */
+  height: vh(60); /* convert to vh       | 转换为 vh */
   margin: 12px;   /*  Auto-convert to vw | 自动转换为 vw */
 }
 ```
 
 ## ⚠️ Notes | 注意事项
-
 ### 📱 Media Query Handling | 媒体查询规则
-
 ```css
 @media screen and (max-width: 300px) {
   /* Values in this scope remain unchanged | 此区域内的值保持原单位 */
