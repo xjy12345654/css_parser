@@ -144,13 +144,23 @@ export component AppWindow inherits Window {
                         Rectangle {
                             horizontal-stretch: 1;
                             // background: orange;
-                   fo_input := LineEdit {
+                            LineEdit {
                                 width: 100%;
                                 placeholder-text: "font_size_num";
                                 text: "\{root.be_fontsize}";
                                 edited(text) => {
                                     root.be_fontsize = text;
                                 }
+                                //通过双向绑定到根目录属性 并设置一个回调给属性 
+                                // 当 if外部 的元素点击时 在点击事件中修改 双向绑定到根目录属性
+                                // private property <bool> clear-focus-propagation <=> root.clear-focus-propagation;
+                                // changed clear-focus-propagation => {
+                                //     if clear-focus-propagation == true {
+                                //         self.clear-focus();
+                                //     }
+                                //     clear-focus-propagation = false;
+                                // }
+
                             }
 
                             height: 30px;
@@ -178,7 +188,7 @@ export component AppWindow inherits Window {
                         }
 
                         Rectangle {
-                            width_inupt := LineEdit {
+                            LineEdit {
                                 width: 100%;
                                 placeholder-text: "width_num";
                                 text: "\{root.be_width}";
@@ -211,7 +221,7 @@ export component AppWindow inherits Window {
 
                         Rectangle {
                             horizontal-stretch: 1;
-                            height_input := LineEdit {
+                            LineEdit {
                                 width: 100%;
                                 placeholder-text: "height_num";
                                 text: "\{root.be_height}";
