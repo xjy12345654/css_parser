@@ -24,7 +24,7 @@
 ```bash
 # Clone repository
 git clone https://github.com/xjy12345654/css_parser.git
-cd css-unit-converter
+cd css_parser
 
 # Build and run
 cargo run
