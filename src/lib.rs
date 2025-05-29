@@ -7,6 +7,7 @@ use std::{
 };
 
 use lightningcss::{
+    error::ParserError,
     properties::custom::{Token, TokenOrValue},
     rules::{CssRule, media::MediaRule},
     stylesheet::{ParserOptions, PrinterOptions, StyleSheet},
@@ -219,18 +220,31 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
 
 //     Ok(())
 // }
-#[derive(Debug)]
-pub struct NoCssFilesFound;
-impl Display for NoCssFilesFound {
+
+#[derive(Debug, PartialEq)]
+pub enum CSSError {
+    NoCssFilesFound,
+    CSSSyntaxError,
+    OtherError,
+}
+impl Display for CSSError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "No CSS files found in the directory")
+        match self {
+            CSSError::NoCssFilesFound => {
+                write!(f, "No CSS files found in the directory")
+            }
+            CSSError::CSSSyntaxError => write!(f, "CSS解析错误"),
+            CSSError::OtherError => write!(f, "其他错误"),
+            // CSSError::OtherError(msg) => write!(f, "其他错误: {}", msg),
+        }
     }
 }
-impl Error for NoCssFilesFound {}
+impl Error for CSSError {}
 
 pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
     let file_path = pa_option.file_path.unwrap_or("");
     let mut css_files_processed = false;
+    // println!("{}", "start");
     for file_item in fs::read_dir(&file_path)? {
         // println!("file_item_{:?}", file_item);
         let file_item = file_item?.path();
@@ -243,13 +257,14 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
             match read_file(sub_options) {
                 Ok(_) => css_files_processed = true,
                 Err(e) => {
+                    // println!("err____{:?}", e);
                     // 如果子目录中没有CSS文件，继续处理其他项
-                    if e.is::<NoCssFilesFound>() {
-                        continue;
+                    if let Some(err) = e.downcast_ref::<CSSError>() {
+                        if *err == CSSError::NoCssFilesFound {
+                            continue;
+                        }
                     }
-                    // else {
-                    //     return Err(e);
-                    // }
+ 
                     return Err(e);
                 }
             }
@@ -265,7 +280,7 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
                         let mut file = File::open(&file_item)?;
                         let mut content = String::new();
                         file.read_to_string(&mut content)?;
-                        let content = unit_analysis_change(pa_option, &content);
+                        let content = unit_analysis_change(pa_option, &content)?;
                         let css_unit = match pa_option.checktype.unwrap_or("_") {
                             "0" => "rem",
                             "1" => "vw",
@@ -284,41 +299,51 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
             }
         }
     }
+    // println!("{}", "end");
     if !css_files_processed {
-        return Err(Box::new(NoCssFilesFound));
+        // return Err(Box::new(NoCssFilesFound));
+        return Err(Box::new(CSSError::NoCssFilesFound));
     }
     Ok(())
 }
 
-fn unit_analysis_change(pa_option: PaOptions, css: &str) -> String {
+
+fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<dyn Error>> {
     // 创建一个用于存储替换后的 CSS 代码的字符串
     let mut replaced_css = String::new();
+    match StyleSheet::parse(css, ParserOptions::default()) {
+        Ok(mut stylesheet) => {
+            let mut visitor = MyVisitor {
+                in_media_condition: false,
+                pa_option,
+            };
 
-    let mut stylesheet = StyleSheet::parse(css, ParserOptions::default()).unwrap();
-    let mut visitor = MyVisitor {
-        in_media_condition: false,
-        pa_option,
-    };
+            stylesheet.visit(&mut visitor).unwrap();
+            let targets = Targets {
+                browsers: Some(Browsers {
+                    chrome: Some(50), // 设置转义后所支持的浏览器版本，
+                    // ie: Some(9),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            };
 
-    stylesheet.visit(&mut visitor).unwrap();
-    let targets = Targets {
-        browsers: Some(Browsers {
-            chrome: Some(50), // 设置转义后所支持的浏览器版本，
-            // ie: Some(9),
-            ..Default::default()
-        }),
-        ..Default::default()
-    };
-
-    let res = stylesheet
-        .to_css(PrinterOptions {
-            // minify: true,
-            targets,
-            ..Default::default()
-        })
-        .unwrap();
-    // println!("{:?}", res.code);
-
-    replaced_css.push_str(&res.code);
-    replaced_css
+            let res = stylesheet
+                .to_css(PrinterOptions {
+                    // minify: true,
+                    targets,
+                    ..Default::default()
+                })
+                .unwrap();
+            replaced_css.push_str(&res.code);
+            Ok(replaced_css)
+        }
+        Err(e) => match e.kind {
+            ParserError::UnexpectedToken(_e) => Err(Box::new(CSSError::CSSSyntaxError)),
+            _ => Err(Box::new(CSSError::OtherError)),
+        },
+        // Err(_e) =>  {
+        //       Err(Box::new(CSSError::CSSSyntaxError))
+        // },
+    }
 }
