@@ -59,15 +59,15 @@ cargo build --release
 ## ⚠️ Notes | 注意事项
 ### 📱 Media Query Handling | 媒体查询规则
 ```css
+/* 
+The px unit will remain unchanged within the parentheses of media queries.
+px 单位在 media queries 的括号内将保持不变
+*/
 @media screen and (max-width: 300px) {
-  /* Values in this scope remain unchanged | 此区域内的值保持原单位 */
+  /**  Continue to convert */
   .box {...}
 }
-/* 
-Pixel values in media queries will NOT be converted
-媒体查询中的像素值保留原单位
 
-*/
 ```
 ###  1px Special Cases | 1px 处理规则
 ```css
