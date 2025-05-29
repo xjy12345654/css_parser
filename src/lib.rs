@@ -68,7 +68,7 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
     }
 
     fn visit_token(&mut self, token: &mut TokenOrValue<'i>) -> Result<(), Self::Error> {
-        // println!("{:?}", token);
+        println!("token_{:?}", token);
         if self.pa_option.checktype.unwrap() == "1" {
             match token {
                 TokenOrValue::Function(f) if f.name.0 == "vh" => {
@@ -122,66 +122,73 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
         // 如果不在媒体查询的条件部分，则进行转换
         let pa_option = self.pa_option;
         let checktype = pa_option.checktype.unwrap();
-
+        // println!("self_{:?}",self);
         if !self.in_media_condition {
-            match checktype {
-                "0" => {
-                    let font_value = pa_option.font_num.unwrap_or(50.0);
-                    // match length {
-                    //     LengthValue::Px(px) => {
-                    //         let px = *px;
-                    //         if px.abs() != 1.0 {
-                    //             *length = LengthValue::Rem(px / font_value);
-                    //         }
-                    //     }
-                    //     _ => {}
-                    // }
-
-                    if let LengthValue::Px(px) = length {
-                        // let px_val = px.abs();
-                        // let px = *px;
-                        // if px.abs() != 1.0 {
-                        //     *length = LengthValue::Rem(px / font_value);
-                        // }
-
-                        let px_val = px.abs();
-                        // println!("{}", (px_val - 1.0).abs() > f32::EPSILON);
-                        if (px_val - 1.0).abs() > f32::EPSILON {
-                            *length = LengthValue::Rem(*px / font_value);
-                        }
-                    }
-                }
-                "1" => {
-                    let be_width = pa_option.be_width.unwrap_or(1920.0);
-
-                    // match length {
-                    //     LengthValue::Px(px) => {
-                    //         let px = *px;
-                    //         if px.abs() != 1.0 {
-                    //             let result = (px / be_width * 100.0 * 1000.0).round() / 1000.0;
-                    //             *length = LengthValue::Vw(result);
-                    //         }
-                    //     }
-                    //     _ => {}
-                    // }
-
-                    if let LengthValue::Px(px) = length {
-                        // let px = *px;
-                        // if px.abs() != 1.0 {
-                        //     let result = (px / be_width * 100.0 * 1000.0).round() / 1000.0;
-                        //     *length = LengthValue::Vw(result);
-                        // }
-                        let px_val = px.abs();
-
-                        // println!("{}", (px_val - 1.0).abs() > f32::EPSILON);
-                        if (px_val - 1.0).abs() > f32::EPSILON {
-                            let result = (*px / be_width * 100.0 * 1000.0).round() / 1000.0;
-                            *length = LengthValue::Vw(result);
-                        }
-                    }
-                }
-                _ => {}
+            if let LengthValue::Px(px) = length {
+                *length = conditional_px_conversion(*px, pa_option);
             }
+
+            // match checktype {
+            //     "0" => {
+            //         let font_value = pa_option.font_num.unwrap_or(50.0);
+            //         // match length {
+            //         //     LengthValue::Px(px) => {
+            //         //         let px = *px;
+            //         //         if px.abs() != 1.0 {
+            //         //             *length = LengthValue::Rem(px / font_value);
+            //         //         }
+            //         //     }
+            //         //     _ => {}
+            //         // }
+
+            //         if let LengthValue::Px(px) = length {
+            //             // let px_val = px.abs();
+            //             // let px = *px;
+            //             // if px.abs() != 1.0 {
+            //             //     *length = LengthValue::Rem(px / font_value);
+            //             // }
+
+            //             // convert_px_to_rem(px,length,font_value);
+            //             let px_val = px.abs();
+            //             // println!("val_{}", px);
+            //             // println!("{}", (px_val - 1.0).abs() > f32::EPSILON);
+            //             if (px_val - 1.0).abs() > f32::EPSILON {
+            //                 *length = LengthValue::Rem(*px / font_value);
+            //             }
+            //         }
+            //     }
+            //     "1" => {
+            //         let be_width = pa_option.be_width.unwrap_or(1920.0);
+
+            //         // match length {
+            //         //     LengthValue::Px(px) => {
+            //         //         let px = *px;
+            //         //         if px.abs() != 1.0 {
+            //         //             let result = (px / be_width * 100.0 * 1000.0).round() / 1000.0;
+            //         //             *length = LengthValue::Vw(result);
+            //         //         }
+            //         //     }
+            //         //     _ => {}
+            //         // }
+
+            //         if let LengthValue::Px(px) = length {
+            //             // let px = *px;
+            //             // if px.abs() != 1.0 {
+            //             //     let result = (px / be_width * 100.0 * 1000.0).round() / 1000.0;
+            //             //     *length = LengthValue::Vw(result);
+            //             // }
+
+            //             let px_val = px.abs();
+
+            //             // println!("{}", (px_val - 1.0).abs() > f32::EPSILON);
+            //             if (px_val - 1.0).abs() > f32::EPSILON {
+            //                 let result = (*px / be_width * 100.0 * 1000.0).round() / 1000.0;
+            //                 *length = LengthValue::Vw(result);
+            //             }
+            //         }
+            //     }
+            //     _ => {}
+            // }
         }
 
         Ok(())
@@ -264,7 +271,7 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
                             continue;
                         }
                     }
- 
+
                     return Err(e);
                 }
             }
@@ -307,7 +314,6 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-
 fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<dyn Error>> {
     // 创建一个用于存储替换后的 CSS 代码的字符串
     let mut replaced_css = String::new();
@@ -339,7 +345,7 @@ fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<d
             Ok(replaced_css)
         }
         // Err(e) => match e.kind {
-         
+
         //     ParserError::UnexpectedToken(_e) => Err(Box::new(CSSError::CSSSyntaxError)),
         //     _ => {
         //         println!("err___{:?}",e);
@@ -347,8 +353,42 @@ fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<d
         //     }
         //    ,
         // },
-        Err(_e) =>  {
-              Err(Box::new(CSSError::CSSSyntaxError))
-        },
+        Err(_e) => Err(Box::new(CSSError::CSSSyntaxError)),
+    }
+}
+
+// fn convert_px_to_rem(val:f32,fontsize:f32)->LengthValue{
+//     let px_val = val.abs();
+//     if (px_val - 1.0).abs() > f32::EPSILON {
+//           LengthValue::Rem(val / fontsize)
+//     }else{
+//         LengthValue::Px(val)
+//     }
+
+// }
+fn conditional_px_conversion(px: f32, pa_option: PaOptions) -> LengthValue {
+    let checktype = pa_option.checktype.unwrap_or("");
+    match checktype {
+        "0" => {
+            let font_value = pa_option.font_num.unwrap_or(50.0);
+            let px_val = px.abs();
+            if (px_val - 1.0).abs() > f32::EPSILON {
+                LengthValue::Rem(px / font_value)
+            } else {
+                LengthValue::Px(px)
+            }
+        }
+        "1" => {
+            let be_width = pa_option.be_width.unwrap_or(1920.0);
+            let px_val = px.abs();
+            // println!("{}", (px_val - 1.0).abs() > f32::EPSILON);
+            if (px_val - 1.0).abs() > f32::EPSILON {
+                let result = (px / be_width * 100.0 * 1000.0).round() / 1000.0;
+                LengthValue::Vw(result)
+            } else {
+                LengthValue::Px(px)
+            }
+        }
+        _ => LengthValue::Px(px),
     }
 }
