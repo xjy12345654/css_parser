@@ -1,0 +1,94 @@
+export component Popmsg {
+    width: 100%;
+    height: 100%;
+    in-out property <string> title_text:"message";
+    in-out property <string> context_text:"";
+    in-out property <duration> an_dutime:200ms;
+    callback clicked();
+    VerticalLayout {
+        width: 300px;
+        alignment: center;
+        Rectangle {
+            // background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.8);
+            border-radius: 6px;
+            VerticalLayout {
+                padding: 15px;
+                HorizontalLayout {
+                    alignment: start;
+                    Rectangle {
+                        width: 100%;
+                        title_el := Text {
+                            width: 100%;
+                            text: title_text;
+                            font-size: 20px;
+                            font-weight: 600;
+                            color: #333;
+                            wrap: word-wrap;
+                        }
+                    }
+
+                    padding-bottom: 10px;
+                }
+
+                HorizontalLayout {
+                // alignment: start;
+                Rectangle {
+                        width: 100%;
+                        Text {
+                            width: 100%;
+                        // horizontal-alignment: center;
+                        // text: "please input number!";
+                        text: context_text;
+                            font-size: 16px;
+                            color: #333;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    padding-top: 15px;
+                    alignment: end;
+                    spacing: 10px;
+                    Rectangle {
+                        HorizontalLayout {
+                            padding-top: 4px;
+                            padding-bottom: 4px;
+                            padding-left: 6px;
+                            padding-right: 6px;
+                            Text {
+                                text: "close";
+                                font-size: 15px;
+                                color: #fff;
+                            }
+                        }
+                    // background: #2E68ED;
+                    background: close_btn.pressed ? #1f096d : @linear-gradient(90deg, #1552fa, #4715fa);
+                        animate background { duration: an_dutime; }
+                        border-radius: 5px;
+                        close_btn := TouchArea {
+                            mouse-cursor: pointer;
+                            clicked => {
+                                root.clicked();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+    // dailog := Rectangle {
+    //     visible: false;
+    //     z: 3;
+    //     background: rgba(0,0,0,0.7);
+    //     opacity: 0;
+    //     animate opacity { duration: an_dutime; }
+    //     TouchArea { }
+
+    // }
+}

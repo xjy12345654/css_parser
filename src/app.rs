@@ -1,6 +1,6 @@
 // src/app.rs
 slint::include_modules!();
-use ::css_parser::{NoCssFilesFound, PaOptions, read_file};
+use ::css_parser::{CSSError, PaOptions, read_file};
 use rfd::FileDialog;
 use std::error::Error;
 // use slint::ComponentHandle;
@@ -40,8 +40,7 @@ impl AppController {
 
     fn handle_button_click(ui: &AppWindow) {
         let checktype = ui.get_selected_index();
-        let file_path: String = ui.invoke_getfilepath().into();
-        // println!("file_path_{}", file_path);
+        let file_path = ui.get_be_filepath().to_string();
         if file_path.is_empty() {
             ui.invoke_tip_msg(1, 1);
             return;
@@ -78,14 +77,21 @@ impl AppController {
                 ui.invoke_tip_msg(0, 0);
             }
             Err(e) => {
-                match e.downcast_ref::<NoCssFilesFound>() {
-                    Some(_) => {
+                match e.downcast_ref::<CSSError>() {
+                    Some(CSSError::NoCssFilesFound) => {
                         ui.invoke_tip_msg(1, 3);
-                        return;
+                    }
+                    Some(CSSError::CSSSyntaxError) => {
+                        ui.invoke_tip_msg(1, 4);
                     }
                     _ => {}
                 }
-                ui.invoke_tip_msg(1, 2);
+
+                if let Some(io_err) = e.downcast_ref::<std::io::Error>() {
+                    if io_err.kind() == std::io::ErrorKind::NotFound {
+                        ui.invoke_tip_msg(1, 2);
+                    }
+                }
             }
         };
     }
@@ -95,7 +101,8 @@ impl AppController {
         match selected_path {
             Some(path) => {
                 let flie_path = path.display().to_string();
-                ui.invoke_flie_inputte(flie_path.into());
+                ui.set_be_filepath(flie_path.into());
+                // println!("{}", flie_path);
             }
             None => {}
         }

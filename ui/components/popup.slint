@@ -1,0 +1,35 @@
+export component Popup {
+    width: 100%;
+    height: 100%;
+    in-out property <string> title_text:"message";
+    in-out property <string> context_text:"";
+    in-out property <duration> an_dutime:200ms;
+    callback show();
+    show() => {
+        popup.visible = true;
+        popup.opacity = 1;
+    }
+    callback hide();
+    hide() => {
+        popup.opacity = 0;
+        hidevi.running = true;
+    }
+    hidevi := Timer {
+        interval: an_dutime;
+        running: false;
+        triggered() => {
+            self.running = false;
+            popup.visible = false;
+        }
+    }
+
+    popup := Rectangle {
+        visible: false;
+        z: 3;
+        background: rgba(0,0,0,0.7);
+        opacity: 0;
+        animate opacity { duration: an_dutime; }
+        TouchArea { }
+        @children
+    }
+}
