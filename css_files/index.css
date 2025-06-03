@@ -10,12 +10,22 @@
 .foo {
   width: 100px;
 }
+.el-icon-ice-cream-round:before {
+  content: "\e6a0";
+}
+.layui-icon-success:before {
+  content: "\e697";
+}
 @media screen and (max-width: 500px) {
   .foo {
     width: 100px;
   }
 }
-
+@container (max-width: 780px) {
+  p {
+   font-size: 20px;
+ }
+}
 .foo {
   width: 32px;
   height: vh(60);

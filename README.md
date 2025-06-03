@@ -38,10 +38,11 @@ cargo build --release
 
 ### 📂 File Naming Convention | 文件命名规则
 
-| Pattern          | Behavior              | 说明            |
-| ---------------- | --------------------- | --------------- |
-| `*_conv_rem.css` | Skip rem conversion   | 跳过 rem 转换   |
-| `*_conv_vw.css`  | Skip vw/vh conversion | 跳过 vw/vh 转换 |
+| Pattern          | Behavior                | 说明            |
+| ---------------- | ---------------------   | --------------- |
+| `.css`           | Skip rem/vw conversion  | 跳过 rem/vw 转换|
+| `*_conv_rem.css` | Skip rem conversion     | 跳过 rem 转换   |
+| `*_conv_vw.css`  | Skip vw/vh conversion   | 跳过 vw/vh 转换 |
 
 ---
 
