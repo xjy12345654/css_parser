@@ -178,7 +178,7 @@ impl Display for CSSError {
 }
 impl Error for CSSError {}
 
-pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
+pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error+ Send + Sync>> {
     let file_path = pa_option.file_path.unwrap_or("");
     let mut css_files_processed = false;
     // println!("{}", "start");
@@ -240,7 +240,7 @@ pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<dyn Error>> {
+fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<dyn Error+ Send + Sync>> {
     // 创建一个用于存储替换后的 CSS 代码的字符串
     let mut replaced_css = String::new();
     match StyleSheet::parse(css, ParserOptions::default()) {
