@@ -1,0 +1,47 @@
+export component Loading {
+    in-out property <string> text:"please wait...";
+    init => {
+        loading_icon.rotation-angle = 360deg;
+    }
+
+    // Timer {
+    //     interval: 10ms;
+    //     running: true;
+    //     triggered() => {
+    //         loading_icon.rotation-angle = 360deg;
+    //         self.running = false;
+    //     }
+    // }
+
+    Rectangle {
+        width: 200px;
+        height: 35px;
+        border-radius: 6px;
+        VerticalLayout {
+            alignment: center;
+            HorizontalLayout {
+                alignment: center;
+                spacing: 7px;
+                loading_icon := Image {
+                    width: 24px;
+                    height: 24px;
+                    source: @image-url("../images/loading.png");
+                    rotation-angle: 0deg;
+                    animate rotation-angle {
+                        duration: 1700ms;
+                        iteration-count: -1;
+                    }
+                }
+
+                Rectangle {
+                    Text {
+                        text: text;
+                        font-size: 16px;
+                    }
+                }
+            }
+        }
+
+        background: #fff;
+    }
+}

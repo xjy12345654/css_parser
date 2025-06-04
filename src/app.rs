@@ -71,7 +71,11 @@ impl AppController {
             }
         };
 
+        // ui.invoke_wait_popup_show();//弹窗
+        // let start_time=Instant::now();
         let res = read_file(pa_option);
+        // let elapsed = start_time.elapsed();
+        // println!("elapsed_{:?}",elapsed);//100ms
         match res {
             Ok(()) => {
                 ui.invoke_tip_msg(0, 0);
@@ -94,6 +98,7 @@ impl AppController {
                 }
             }
         };
+        // ui.invoke_wait_popup_hide();
     }
 
     fn handle_file_selection(ui: &AppWindow) {

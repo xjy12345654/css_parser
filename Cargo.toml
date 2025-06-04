@@ -7,7 +7,6 @@ edition = "2024"
 
 [dependencies]
 slint = "1.10.0"
-# slint = { version = "1.10.0", features = ["raw-window-handle-06"] }
 rfd = "0.15.3"
 lightningcss = { version = "1.0.0-alpha.63", features = ["visitor"] }
 [build-dependencies]

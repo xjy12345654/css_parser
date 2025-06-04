@@ -102,15 +102,6 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
 
     //     Ok(())
     // }
-    // fn visit_property(&mut self, property: &mut Property<'i>) -> Result<(), Self::Error> {
-    //     println!("property_{:?}", property);
-    //     if let Property::Custom(custom_property) = property {
-    //         if let CustomPropertyName::Unknown(ident) = &custom_property.name {
-    //             println!("name__{:?}", ident.0);
-    //         }
-    //     }
-    //     Ok(())
-    // }
 
     fn visit_token(&mut self, token: &mut TokenOrValue<'i>) -> Result<(), Self::Error> {
         // println!("token_{:?}", token);

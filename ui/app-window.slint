@@ -14,6 +14,7 @@ import { CheckGroup } from "./components/check-group.slint";
 import { TipMsg } from "./components/tip-msg.slint";
 import { Popup } from "./components/popup.slint";
 import { Popmsg } from "./components/popmsg.slint";
+import { Loading } from "./components/loading.slint";
 
 export component AppWindow inherits Window {
     width: 500px;
@@ -347,5 +348,19 @@ export component AppWindow inherits Window {
                 popup.hide();
             }
         }
+    }
+
+    callback wait_popup_show();
+    wait_popup_show() => {
+        wait_popup.show();
+        // debug("show");
+    }
+    callback wait_popup_hide();
+    wait_popup_hide() => {
+        wait_popup.hide();
+        // debug("hid");
+    }
+    wait_popup := Popup {
+        Loading { }
     }
 }
