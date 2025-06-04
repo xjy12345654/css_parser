@@ -2,7 +2,12 @@
 slint::include_modules!();
 use ::css_parser::{CSSError, PaOptions, read_file};
 use rfd::FileDialog;
-use std::error::Error;
+
+use std::{
+    error::Error,
+    thread,
+    time::{Duration, Instant},
+};
 // use slint::ComponentHandle;
 // use crate::AppWindow;
 pub struct AppController {
@@ -49,7 +54,6 @@ impl AppController {
         let pa_option = if checktype == "0" {
             let str_num = ui.get_be_fontsize();
             let num: f32 = str_num.parse().unwrap_or(0.0);
-
             PaOptions {
                 font_num: Some(num),
                 checktype: Some(checktype.as_str()),
@@ -70,17 +74,38 @@ impl AppController {
                 ..Default::default()
             }
         };
-
-        // ui.invoke_wait_popup_show();//弹窗
-        // let start_time=Instant::now();
+        // println!("{}",333);
+        // ui.invoke_wait_popup_show();
+        let ui2=ui.as_weak();
+        thread::spawn(move||{
+            slint::invoke_from_event_loop(move || {
+                ui2.unwrap().invoke_wait_popup_show();
+                println!("{}",111);
+            })
+        });
+        println!("{}",222);
+        let start_time = Instant::now();
         let res = read_file(pa_option);
-        // let elapsed = start_time.elapsed();
-        // println!("elapsed_{:?}",elapsed);//100ms
+        println!("{}",333);
+        let elapsed = start_time.elapsed();
+        println!("elapsed_{:?}", elapsed);
+        let ui3 = ui.as_weak();
+
         match res {
             Ok(()) => {
-                ui.invoke_tip_msg(0, 0);
+                // ui.invoke_tip_msg(0, 0);
+                // println!("{}", "111");
+                thread::spawn(move || {
+                    thread::sleep(Duration::from_millis(200));
+                    slint::invoke_from_event_loop(move || {
+                        ui3.unwrap().invoke_tip_msg(0, 0);
+                        ui3.unwrap().invoke_wait_popup_hide();
+                        println!("{}",444);
+                    })
+                });
             }
             Err(e) => {
+                ui.invoke_wait_popup_hide();
                 match e.downcast_ref::<CSSError>() {
                     Some(CSSError::NoCssFilesFound) => {
                         ui.invoke_tip_msg(1, 3);
@@ -98,7 +123,6 @@ impl AppController {
                 }
             }
         };
-        // ui.invoke_wait_popup_hide();
     }
 
     fn handle_file_selection(ui: &AppWindow) {
