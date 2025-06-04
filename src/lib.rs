@@ -7,11 +7,8 @@ use std::{
 };
 
 use lightningcss::{
-    properties::{
-        Property,
-        custom::{CustomPropertyName, Token, TokenOrValue},
-    },
-    rules::CssRule,
+    properties::custom::{Token, TokenOrValue},
+    // rules::CssRule,
     stylesheet::{ParserOptions, PrinterOptions, StyleSheet},
     targets::{Browsers, Targets},
     values::length::LengthValue,
@@ -63,11 +60,7 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
     ) -> Result<(), Self::Error> {
         Ok(())
     }
-    // fn visit_property(&mut self, property: &mut lightningcss::properties::Property<'i>) -> Result<(), Self::Error> {
-    //  println!("pro__{:?}",property);
-    //     Ok(())
-    // }
-
+ 
     // fn visit_rule(&mut self, rule: &mut CssRule<'i>) -> Result<(), Self::Error> {
     //     match rule {
     //         CssRule::Media(MediaRule { query, rules, .. }) => {
@@ -151,19 +144,14 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
                     // }
                 }
             }
-            TokenOrValue::Token(token) => {
-                // println!("ttt_{:?}",token);
-                // let s = "\u{e6a0}";
-                // println!("{}", s); // 打印: 
-                // println!("{:?}", s);
-                if let Token::String(str) = token {
-                    println!("str____{:?}", str);
-                    // let escaped = escape_unicode_chars(str);
-                    // println!("escaped____{:?}", escaped);
-                    // *str = escaped.into();
-
-                }
-            }
+            // TokenOrValue::Token(token) => {
+            //     // println!("ttt_{:?}",token);
+            //     if let Token::String(str) = token {
+            //         println!("str____{:?}", str);
+            //         let escaped = escape_unicode_chars(str);
+            //         *str=escaped.into();
+            //     }
+            // }
             _ => {}
         }
 
@@ -319,16 +307,15 @@ fn conditional_px_conversion(px: f32, pa_option: PaOptions) -> LengthValue {
         LengthValue::Px(px)
     }
 }
-fn escape_unicode_chars(s: &str) -> String {
-    let mut result = String::new();
-    for c in s.chars() {
-        if c.is_ascii() {
-            result.push(c);
-        } else {
-            let code_point = c as u32;
-            result.push_str(&format!("\\{:x}", code_point));
-        }
-    }
-    result
-}
- 
+// fn escape_unicode_chars(s: &str) -> String {
+//     let mut result = String::new();
+//     for c in s.chars() {
+//         if c.is_ascii() {
+//             result.push(c);
+//         } else {
+//             let code_point = c as u32;
+//             result.push_str(&format!("\\{:x}", code_point));
+//         }
+//     }
+//     result
+// }
