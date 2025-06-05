@@ -1,9 +1,9 @@
 // src/app.rs
 slint::include_modules!();
-use ::css_parser::{CSSError, PaOptions, read_file};
+use ::css_parser::{CSSError, PaOptions, read_file_ra};
 use rfd::FileDialog;
 
-use std::{error::Error, thread, time::Instant};
+use std::{error::Error, io::ErrorKind, thread, time::Instant};
 // use slint::ComponentHandle;
 // use crate::AppWindow;
 pub struct AppController {
@@ -56,6 +56,7 @@ impl AppController {
 
         ui.invoke_wait_popup_show();
         let re_ui = ui.as_weak();
+        //操作文件开一个线程，保证合理的ui渲染
         thread::spawn(move || {
             let pa_option = if checktype == "0" {
                 PaOptions {
@@ -75,10 +76,9 @@ impl AppController {
             };
 
             let start_time = Instant::now();
-            let res = read_file(pa_option);
+            let res = read_file_ra(pa_option);
             let elapsed = start_time.elapsed();
-            println!("耗时_{:?}", elapsed);
-
+            println!("耗时___{:?}", elapsed);
             slint::invoke_from_event_loop(move || {
                 re_ui.unwrap().invoke_wait_popup_hide();
                 match res {
@@ -97,8 +97,11 @@ impl AppController {
                         }
 
                         if let Some(io_err) = e.downcast_ref::<std::io::Error>() {
-                            if io_err.kind() == std::io::ErrorKind::NotFound {
-                                re_ui.unwrap().invoke_tip_msg(1, 2);
+                            // println!("erro__{}",io_err.kind());
+                            match io_err.kind() {
+                                ErrorKind::NotFound => re_ui.unwrap().invoke_tip_msg(1, 2),
+                                ErrorKind::InvalidFilename => re_ui.unwrap().invoke_tip_msg(1, 5),
+                                _ => {}
                             }
                         }
                     }

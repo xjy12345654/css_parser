@@ -1,11 +1,3 @@
-use std::{
-    error::Error,
-    fmt::Display,
-    fs::{self, File},
-    io::{Read, Write},
-    path::Path,
-};
-
 use lightningcss::{
     properties::custom::{Token, TokenOrValue},
     // rules::CssRule,
@@ -15,8 +7,14 @@ use lightningcss::{
     visit_types,
     visitor::{Visit, VisitTypes, Visitor},
 };
-
-use std::convert::Infallible;
+use rayon::prelude::*;
+use std::{convert::Infallible, sync::Arc};
+use std::{
+    error::Error,
+    fmt::Display,
+    fs::{self},
+    path::{Path, PathBuf},
+};
 #[derive(Default, Debug, Clone, Copy)]
 pub struct PaOptions<'a> {
     pub font_num: Option<f32>,
@@ -60,7 +58,7 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
     ) -> Result<(), Self::Error> {
         Ok(())
     }
- 
+
     // fn visit_rule(&mut self, rule: &mut CssRule<'i>) -> Result<(), Self::Error> {
     //     match rule {
     //         CssRule::Media(MediaRule { query, rules, .. }) => {
@@ -177,75 +175,138 @@ impl Display for CSSError {
     }
 }
 impl Error for CSSError {}
-
-pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error+ Send + Sync>> {
+// 单线程递归处理文件
+// pub fn read_file(pa_option: PaOptions) -> Result<(), Box<dyn Error + Send + Sync>> {
+//     let file_path = pa_option.file_path.unwrap_or("");
+//     let mut css_files_processed = false;
+//     // println!("{}", "start");
+//     for file_item in fs::read_dir(&file_path)? {
+//         // println!("file_item_{:?}", file_item);
+//         let file_item = file_item?.path();
+//         if file_item.is_dir() {
+//             // 递归处理子目录
+//             let mut sub_options = pa_option.clone();
+//             let file_path = file_item.to_str().unwrap().to_string();
+//             sub_options.file_path = Some(&file_path);
+//             // 递归调用read_file并合并结果
+//             match read_file(sub_options) {
+//                 Ok(_) => css_files_processed = true,
+//                 Err(e) => {
+//                     println!("err____{:?}", e);
+//                     // 如果子目录中没有CSS文件，继续处理其他项
+//                     if let Some(err) = e.downcast_ref::<CSSError>() {
+//                         if *err == CSSError::NoCssFilesFound {
+//                             continue;
+//                         }
+//                     }
+//                     return Err(e);
+//                 }
+//             }
+//         } else if file_item.is_file() {
+//             if let Some(ext) = file_item.extension() {
+//                 if ext.to_str() == Some("css") {
+//                     // let file_name = file_item.file_stem().unwrap().to_str().unwrap();
+//                     let file_name = file_item
+//                         .file_stem()
+//                         .and_then(|s| s.to_str())
+//                         .unwrap_or_default();
+//                     if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
+//                         let mut file = File::open(&file_item)?;
+//                         let mut content = String::new();
+//                         file.read_to_string(&mut content)?;
+//                         let content = unit_analysis_change(&pa_option, &content)?;
+//                         let css_unit = match pa_option.checktype.unwrap_or("_") {
+//                             "0" => "rem",
+//                             "1" => "vw",
+//                             _ => "_",
+//                         };
+//                         let new_name = format!("{}_conv_{}.css", file_name, css_unit);
+//                         let new_file_path = Path::new(file_path).join(&new_name);
+//                         // println!("new_file_path_{:?}", new_file_path);
+//                         let mut new_file = File::create(new_file_path)?;
+//                         new_file.write_all(content.as_bytes())?;
+//                         css_files_processed = true;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     // println!("{}", "end");
+//     if !css_files_processed {
+//         return Err(Box::new(CSSError::NoCssFilesFound));
+//     }
+//     Ok(())
+// }
+// 并行操作文件
+pub fn read_file_ra(pa_option: PaOptions) -> Result<(), Box<dyn Error + Send + Sync>> {
     let file_path = pa_option.file_path.unwrap_or("");
-    let mut css_files_processed = false;
-    // println!("{}", "start");
-    for file_item in fs::read_dir(&file_path)? {
-        // println!("file_item_{:?}", file_item);
-        let file_item = file_item?.path();
-        if file_item.is_dir() {
-            // 递归处理子目录
-            let mut sub_options = pa_option.clone();
-            let file_path = file_item.to_str().unwrap().to_string();
-            sub_options.file_path = Some(&file_path);
-            // 递归调用read_file并合并结果
-            match read_file(sub_options) {
-                Ok(_) => css_files_processed = true,
-                Err(e) => {
-                    println!("err____{:?}", e);
-                    // 如果子目录中没有CSS文件，继续处理其他项
-                    if let Some(err) = e.downcast_ref::<CSSError>() {
-                        if *err == CSSError::NoCssFilesFound {
-                            continue;
-                        }
-                    }
-                    return Err(e);
-                }
-            }
-        } else if file_item.is_file() {
-            if let Some(ext) = file_item.extension() {
-                if ext.to_str() == Some("css") {
-                    // let file_name = file_item.file_stem().unwrap().to_str().unwrap();
-                    let file_name = file_item
-                        .file_stem()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or_default();
-                    if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
-                        let mut file = File::open(&file_item)?;
-                        let mut content = String::new();
-                        file.read_to_string(&mut content)?;
-                        let content = unit_analysis_change(pa_option, &content)?;
-                        let css_unit = match pa_option.checktype.unwrap_or("_") {
-                            "0" => "rem",
-                            "1" => "vw",
-                            _ => "_",
-                        };
-                        let new_name = format!("{}_conv_{}.css", file_name, css_unit);
-                        let new_file_path = Path::new(file_path).join(&new_name);
-                        // println!("new_file_path_{:?}", new_file_path);
-                        let mut new_file = File::create(new_file_path)?;
-                        new_file.write_all(content.as_bytes())?;
-                        css_files_processed = true;
-                    }
-                }
-            }
-        }
-    }
-    // println!("{}", "end");
-    if !css_files_processed {
+    let css_files = find_css_files(file_path)?;
+    if css_files.is_empty() {
         return Err(Box::new(CSSError::NoCssFilesFound));
     }
+    let css_unit = match pa_option.checktype.unwrap_or("_") {
+        "0" => "rem",
+        "1" => "vw",
+        _ => "_",
+    };
+    let pa_option_arc = Arc::new(pa_option);
+    css_files
+        .par_iter()
+        .try_for_each(|file_path| process_single_file(file_path, pa_option_arc.as_ref(), css_unit))
+}
+
+fn process_single_file(
+    file_path: &Path,
+    pa_option: &PaOptions,
+    endstr: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let file_name = file_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default();
+    if file_name.ends_with("_conv_rem") || file_name.ends_with("_conv_vw") {
+        return Ok(());
+    }
+    // let content = fs::read_to_string(file_path).map_err(|e| {
+    //     Box::new(std::io::Error::new(
+    //         e.kind(),
+    //         format!("read fail:{}", file_path.display()),
+    //     ))
+    // })?;
+    let content = fs::read_to_string(file_path)?;
+    let converted = unit_analysis_change(pa_option, &content)?;
+    let out_put_path = file_path.with_file_name(format!("{}_conv_{}.css", file_name, endstr));
+    fs::write(out_put_path, converted)?;
     Ok(())
 }
 
-fn unit_analysis_change(pa_option: PaOptions, css: &str) -> Result<String, Box<dyn Error+ Send + Sync>> {
+fn find_css_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
+    let mut css_files = Vec::new();
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            css_files.extend(find_css_files(path.to_str().unwrap())?);
+        } else if let Some(ext) = path.extension() {
+            if ext.to_str() == Some("css") {
+                css_files.push(path);
+            }
+        }
+    }
+    Ok(css_files)
+}
+
+fn unit_analysis_change(
+    pa_option: &PaOptions,
+    css: &str,
+) -> Result<String, Box<dyn Error + Send + Sync>> {
     // 创建一个用于存储替换后的 CSS 代码的字符串
     let mut replaced_css = String::new();
     match StyleSheet::parse(css, ParserOptions::default()) {
         Ok(mut stylesheet) => {
-            let mut visitor = MyVisitor { pa_option };
+            let mut visitor = MyVisitor {
+                pa_option: *pa_option,
+            };
             stylesheet.visit(&mut visitor).unwrap();
             let targets = Targets {
                 browsers: Some(Browsers {
