@@ -1,16 +1,6 @@
 import { VerticalBox,LineEdit } from "std-widgets.slint";
-
-component my_button inherits Rectangle {
-    width: 200px;
-    height: 40px;
-    // background: area.pressed ? #fff : orange;
-    border-radius: 5px;
-    // area := TouchArea { 
-    // }
-}
-
 import { List } from "./components/types/types.slint";
-import { CheckGroup } from "./components/check-group.slint";
+import {  RadioGroup } from "./components/radio-group.slint";
 import { TipMsg } from "./components/tip-msg.slint";
 import { Popup } from "./components/popup.slint";
 import { Popmsg } from "./components/popmsg.slint";
@@ -279,7 +269,7 @@ export component AppWindow inherits Window {
             }
         }
        //切换内容    
-       CheckGroup {
+       RadioGroup {
             checklist: [{
                 id:"0",
                 value:"0",
@@ -301,7 +291,10 @@ export component AppWindow inherits Window {
             // background: rebeccapurple;
             HorizontalLayout {
                 alignment: center;
-                my_button {
+                Rectangle {
+                    width: 200px;
+                    height: 40px;
+                    border-radius: 5px;
                     Text {
                         font-size: 16px;
                         text: "Enter";

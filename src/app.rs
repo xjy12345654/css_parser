@@ -56,7 +56,7 @@ impl AppController {
 
         ui.invoke_wait_popup_show();
         let re_ui = ui.as_weak();
-        //操作文件开一个线程，保证合理的ui渲染
+        //操作文件开一个线程，保证等待弹层渲染
         thread::spawn(move || {
             let pa_option = if checktype == "0" {
                 PaOptions {
