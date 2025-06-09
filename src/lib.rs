@@ -264,18 +264,16 @@ fn process_single_file(
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or_default();
-    if file_name.ends_with("_conv_rem") || file_name.ends_with("_conv_vw") {
-        return Ok(());
-    }
+
     // let content = fs::read_to_string(file_path).map_err(|e| {
     //     Box::new(std::io::Error::new(
     //         e.kind(),
     //         format!("read fail:{}", file_path.display()),
     //     ))
     // })?;
+    let out_put_path = file_path.with_file_name(format!("{}_conv_{}.css", file_name, endstr));
     let content = fs::read_to_string(file_path)?;
     let converted = unit_analysis_change(pa_option, &content)?;
-    let out_put_path = file_path.with_file_name(format!("{}_conv_{}.css", file_name, endstr));
     fs::write(out_put_path, converted)?;
     Ok(())
 }
@@ -289,12 +287,19 @@ fn find_css_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
             css_files.extend(find_css_files(path.to_str().unwrap())?);
         } else if let Some(ext) = path.extension() {
             if ext.to_str() == Some("css") {
-                css_files.push(path);
+                let file_name = path
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or_default();
+                if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
+                    css_files.push(path);
+                }
             }
         }
     }
     Ok(css_files)
 }
+
 
 fn unit_analysis_change(
     pa_option: &PaOptions,
