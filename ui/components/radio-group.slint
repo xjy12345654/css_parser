@@ -32,11 +32,12 @@ export component RadioGroup {
                             Rectangle {
                                 width: 20px;
                                 height: 20px;
+                                // background: rebeccapurple;
                                 Image {
                                     width: 100%;
                                     height: 100%;
                                     // source: index == selected_index ? @image-url("./images/checked.png") : @image-url("./images/no_check.png");
-                                    source: @image-url("../images/no_check.png");
+                                    source: @image-url("../images/no_check.svg");
                                     Image {
                                         width: 100%;
                                         height: 100%;
@@ -44,7 +45,7 @@ export component RadioGroup {
                                         animate opacity { duration: an_dutime; }
                                         states [
                                             check_active when item.value == root.selected_index: {
-                                                source: @image-url("../images/checked.png");
+                                                source: @image-url("../images/check.svg");
                                                 opacity: 1;
                                             }
                                         ]
