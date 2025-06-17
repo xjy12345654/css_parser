@@ -24,10 +24,10 @@ pub struct PaOptions<'a> {
     pub file_path: Option<&'a str>,
 }
 #[derive(Debug)]
+// 使用lightningcss Visitor 来自定义规则
 struct MyVisitor<'a> {
     pa_option: PaOptions<'a>,
 }
-
 impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
     type Error = Infallible;
     fn visit_types(&self) -> VisitTypes {
@@ -100,7 +100,7 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
 
     //     Ok(())
     // }
-
+    //处理css px值与自定义函数vh()
     fn visit_token(&mut self, token: &mut TokenOrValue<'i>) -> Result<(), Self::Error> {
         // println!("token_{:?}", token);
         match token {
@@ -155,7 +155,8 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
         Ok(())
     }
 }
-
+// 自定义erro 
+//lightningcss内部的error 有生命周期无法返回值外部 ，用自定义error来替换
 #[derive(Debug, PartialEq)]
 pub enum CSSError {
     NoCssFilesFound,
@@ -277,7 +278,7 @@ fn process_single_file(
     fs::write(out_put_path, converted)?;
     Ok(())
 }
-
+//提前过滤文件
 fn find_css_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
     let mut css_files = Vec::new();
     for entry in fs::read_dir(dir)? {

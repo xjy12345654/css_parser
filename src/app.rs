@@ -3,7 +3,7 @@ slint::include_modules!();
 use ::css_parser::{CSSError, PaOptions, read_file_ra};
 use rfd::FileDialog;
 
-use std::{error::Error, io::ErrorKind, thread, time::Instant};
+use std::{error::Error, io::ErrorKind, thread, time::{Instant, Duration}};
 // use slint::ComponentHandle;
 // use crate::AppWindow;
 pub struct AppController {
@@ -53,10 +53,10 @@ impl AppController {
         let be_height = ui.get_be_height();
         let be_width: f32 = be_width.parse().unwrap_or(0.0);
         let be_height: f32 = be_height.parse().unwrap_or(0.0);
-
+        //启动等待弹层。
         ui.invoke_wait_popup_show();
         let re_ui = ui.as_weak();
-        //操作文件开一个线程，保证等待弹层渲染
+        //简明处理没使用异步，使用多线程。操作文件开一个线程，保证等待弹层渲染。
         thread::spawn(move || {
             let pa_option = if checktype == "0" {
                 PaOptions {
@@ -74,18 +74,23 @@ impl AppController {
                     ..Default::default()
                 }
             };
-
+            //延时执行，否则处理少量文件看不到等待弹窗(doge)
+            thread::sleep(Duration::from_millis(200));
             let start_time = Instant::now();
             let res = read_file_ra(pa_option);
             let elapsed = start_time.elapsed();
             println!("耗时___{:?}", elapsed);
+            //该函数适合在线程处理完成任务时，把结果安全的传回ui线程 。
             slint::invoke_from_event_loop(move || {
+                //关闭等待弹窗
                 re_ui.unwrap().invoke_wait_popup_hide();
                 match res {
                     Ok(()) => {
+                        //处理成功后的轻提示回调
                         re_ui.unwrap().invoke_tip_msg(0, 0);
                     }
                     Err(e) => {
+                        //处理失败后的轻提示回调
                         match e.downcast_ref::<CSSError>() {
                             Some(CSSError::NoCssFilesFound) => {
                                 re_ui.unwrap().invoke_tip_msg(1, 3);
@@ -95,7 +100,7 @@ impl AppController {
                             }
                             _ => {}
                         }
-
+                        //处理失败后的轻提示回调
                         if let Some(io_err) = e.downcast_ref::<std::io::Error>() {
                             // println!("erro__{}",io_err.kind());
                             match io_err.kind() {
@@ -109,7 +114,7 @@ impl AppController {
             })
         });
     }
-
+    // 设置文件路径函数
     fn handle_file_selection(ui: &AppWindow) {
         let selected_path = FileDialog::new().set_title("select FilePath").pick_folder();
         match selected_path {

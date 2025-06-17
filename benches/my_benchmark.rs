@@ -1,6 +1,12 @@
-use criterion::{ criterion_group, criterion_main, Criterion};
-use std::path::Path;
+//使用criterion库 测试对比不同函数的性能
+//设置cargo.toml
+// [[bench]]
+//name = "my_benchmark"
+//harness = false
+//最后运行 cargo bench
+use criterion::{Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
+use std::path::Path;
 fn to_string_method(path: &Path) -> String {
     path.file_stem()
         .and_then(|s| s.to_str())

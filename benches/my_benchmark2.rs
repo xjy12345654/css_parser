@@ -1,3 +1,9 @@
+//使用criterion库 测试对比不同函数的性能
+//设置cargo.toml
+// [[bench]]
+//name = "my_benchmark2"
+//harness = false
+//最后运行 cargo bench
 use criterion::{Criterion, criterion_group, criterion_main};
 use rayon::prelude::*;
 use std::fs;
