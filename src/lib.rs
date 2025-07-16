@@ -385,7 +385,7 @@ fn conditional_px_conversion(px: f32, pa_option: PaOptions) -> LengthValue {
 
 fn re_escape_private_use(css: &str) -> String {
     // 正则一次性替换 content 属性里的字面字符
-    // 为了简单，这里只处理 content: "..." 里的双引号字符串
+    // 为了简单，这里只处理 content: "\exx" 里的双引号字符串
     let regexstr = Regex::new(r#"content:\s*"([^"]*)""#).unwrap();
     regexstr
         .replace_all(css, |caps: &regex::Captures| {

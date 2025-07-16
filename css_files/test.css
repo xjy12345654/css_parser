@@ -9,7 +9,7 @@
 .foo {
   width: 100px;
 }
-/*目前没法处理 "\exxx"字符串  */
+
 .el-icon-ice-cream-round:before {   
   content: "\e6a0";
   content: 😂;
