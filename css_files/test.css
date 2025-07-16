@@ -9,9 +9,11 @@
 .foo {
   width: 100px;
 }
-/* .el-icon-ice-cream-round:before {  //目前没法处理 "\exxx"字符串
+/*目前没法处理 "\exxx"字符串  */
+.el-icon-ice-cream-round:before {   
   content: "\e6a0";
-} */
+  content: 😂;
+}
  
 @media screen and (max-width: 500px) {
   .foo {

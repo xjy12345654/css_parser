@@ -8,6 +8,7 @@ use lightningcss::{
     visitor::{Visit, VisitTypes, Visitor},
 };
 use rayon::prelude::*;
+use regex::Regex;
 use std::{convert::Infallible, sync::Arc};
 use std::{
     error::Error,
@@ -15,6 +16,7 @@ use std::{
     fs::{self},
     path::{Path, PathBuf},
 };
+
 #[derive(Default, Debug, Clone, Copy)]
 pub struct PaOptions<'a> {
     pub font_num: Option<f32>,
@@ -133,12 +135,14 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
                     // }
                 }
             }
+       
             // TokenOrValue::Token(token) => {
             //     // println!("ttt_{:?}",token);
             //     if let Token::String(str) = token {
             //         println!("str____{:?}", str);
-            //         let escaped = escape_unicode_chars(str);
-            //         *str=escaped.into();
+            //         // *str=  str.as_bytes();
+            //         // let escaped = escape_unicode_chars(str);
+            //         // *str=escaped.into();
             //     }
             // }
             _ => {}
@@ -155,7 +159,7 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
         Ok(())
     }
 }
-// 自定义erro 
+// 自定义erro
 //lightningcss内部的error 有生命周期无法返回值外部 ，用自定义error来替换
 #[derive(Debug, PartialEq)]
 pub enum CSSError {
@@ -301,7 +305,6 @@ fn find_css_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
     Ok(css_files)
 }
 
-
 fn unit_analysis_change(
     pa_option: &PaOptions,
     css: &str,
@@ -331,7 +334,9 @@ fn unit_analysis_change(
                 })
                 .unwrap();
             replaced_css.push_str(&res.code);
-            Ok(replaced_css)
+            println!("code_{}", res.code);
+            let escaped = re_escape_private_use(&res.code);
+            Ok(escaped)
         }
         // Err(e) => match e.kind {
         //     ParserError::UnexpectedToken(_e) => Err(Box::new(CSSError::CSSSyntaxError)),
@@ -377,3 +382,24 @@ fn conditional_px_conversion(px: f32, pa_option: PaOptions) -> LengthValue {
 //     }
 //     result
 // }
+
+fn re_escape_private_use(css: &str) -> String {
+    // 正则一次性替换 content 属性里的字面字符
+    // 为了简单，这里只处理 content: "..." 里的双引号字符串
+    let regexstr = Regex::new(r#"content:\s*"([^"]*)""#).unwrap();
+    regexstr
+        .replace_all(css, |caps: &regex::Captures| {
+            let mut out = String::from("content:\"");
+            for ch in caps[1].chars() {
+                // U+E000–U+F8FF 属于 BMP Private Use Area
+                if (0xE000..=0xF8FF).contains(&(ch as u32)) {
+                    out.push_str(&format!("\\{:x}", ch as u32));
+                } else {
+                    out.push(ch);
+                }
+            }
+            out.push('"');
+            out
+        })
+        .to_string()
+}

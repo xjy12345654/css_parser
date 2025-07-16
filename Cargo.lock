@@ -1325,6 +1325,7 @@ dependencies = [
  "image",
  "lightningcss",
  "rayon",
+ "regex",
  "rfd",
  "slint",
  "slint-build",
