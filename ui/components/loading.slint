@@ -2,7 +2,8 @@ export component Loading {
     // 加载
     in-out property <string> text:"please wait...";
     init => {
-        loading_icon.rotation-angle = 360deg;
+        // loading_icon.rotation-angle = 360deg;
+        loading_icon.transform-rotation=360deg;
     }
 
     // Timer {
@@ -27,8 +28,8 @@ export component Loading {
                     width: 24px;
                     height: 24px;
                     source: @image-url("../images/loading.png");
-                    rotation-angle: 0deg;
-                    animate rotation-angle {
+                    transform-rotation: 0deg;
+                    animate transform-rotation {
                         duration: 1700ms;
                         iteration-count: -1;
                     }
