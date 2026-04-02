@@ -83,6 +83,9 @@ Absolute Values
 */
 ```
 
+###  Under the selected path, the maximum limit for querying CSS files is 10 layers of directories | 选择路径下，查询css文件最大限制10层目录
+
+
 
 ## 🗂 Project Structure | 项目结构
 

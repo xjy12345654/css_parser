@@ -25,25 +25,57 @@ fn process_single_file(file_path: &Path) -> bool {
 }
 
 // 延迟过滤文件名
-fn find_css_files_unfiltered(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
-    let mut css_files = Vec::new();
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            css_files.extend(find_css_files_unfiltered(path.to_str().unwrap())?);
-        } else if let Some(ext) = path.extension() {
-            if ext.to_str() == Some("css") {
-                css_files.push(path);
+// fn find_css_files_unfiltered(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
+//     let mut css_files = Vec::new();
+//     for entry in fs::read_dir(dir)? {
+//         let entry = entry?;
+//         let path = entry.path();
+//         if path.is_dir() {
+//             css_files.extend(find_css_files_unfiltered(path.to_str().unwrap())?);
+//         } else if let Some(ext) = path.extension() {
+//             if ext.to_str() == Some("css") {
+//                 css_files.push(path);
+//             }
+//         }
+//     }
+//     Ok(css_files)
+// }
+
+fn find_css_files_unfiltered(dir: &str, max_depth: usize) -> Result<Vec<PathBuf>, std::io::Error> {
+    let mut css_files = Vec::with_capacity(100);
+
+    fn find_recursive(
+        dir: &Path,
+        max_depth: usize,
+        curr_depth: usize,
+        files: &mut Vec<PathBuf>,
+    ) -> Result<(), std::io::Error> {
+        if curr_depth > max_depth {
+            return Ok(());
+        }
+
+        for entry in fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                find_recursive(&path, max_depth, curr_depth + 1, files)?;
+            } else if let Some(ext) = path.extension() {
+                if ext.to_str() == Some("css") {
+                    files.push(path);
+                }
             }
         }
+
+        Ok(())
     }
+
+    find_recursive(Path::new(dir),max_depth,1,&mut css_files)?;
     Ok(css_files)
 }
 
 // 延迟过滤文件名的并行操作
 fn process_files_unfiltered(dir: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let css_files = find_css_files_unfiltered(dir)?;
+    let css_files = find_css_files_unfiltered(dir,10)?;
     css_files.par_iter().for_each(|file_path| {
         process_single_file(file_path);
     });
@@ -61,30 +93,43 @@ fn process_single_file2(file_path: &Path) -> bool {
 }
 
 // 提前过滤文件名
-fn find_css_files_filtered(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
-    let mut css_files = Vec::new();
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            css_files.extend(find_css_files_filtered(path.to_str().unwrap())?);
-        } else if let Some(ext) = path.extension() {
-            if ext.to_str() == Some("css") {
-                let file_name = path
-                    .file_stem()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or_default();
-                if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
-                    css_files.push(path);
+fn find_css_files_filtered(dir: &str, max_depth: usize) -> Result<Vec<PathBuf>, std::io::Error> {
+    let mut css_files = Vec::with_capacity(100);
+    fn find_recursive(
+        dir: &Path,
+        max_depth: usize,
+        curr_depth: usize,
+        files: &mut Vec<PathBuf>,
+    ) -> Result<(), std::io::Error> {
+        if curr_depth > max_depth {
+            return Ok(());
+        }
+        for entry in fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                find_recursive(&path, max_depth, curr_depth + 1, files)?;
+            } else if let Some(ext) = path.extension() {
+                if ext.to_str() == Some("css") {
+                    let file_name = path
+                        .file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or_default();
+                    if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
+                        files.push(path);
+                    }
                 }
             }
         }
+        Ok(())
     }
+
+    find_recursive(Path::new(dir), max_depth, 1, &mut css_files)?;
     Ok(css_files)
 }
 
 fn process_files_filtered(dir: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let css_files = find_css_files_filtered(dir)?;
+    let css_files = find_css_files_filtered(dir, 10)?;
     css_files.par_iter().for_each(|file_path| {
         process_single_file2(file_path);
     });
@@ -95,7 +140,6 @@ fn benchmark(c: &mut Criterion) {
     // let path = Path::new("example_conv_rem.css");
     let test_dir = "C:/Users/xjy12/Desktop/test";
 
-
     c.bench_function("process_files_unfiltered", |b| {
         b.iter(|| {
             let result = process_files_unfiltered(test_dir);
@@ -103,7 +147,6 @@ fn benchmark(c: &mut Criterion) {
         })
     });
 
-  
     c.bench_function("process_files_filtered", |b| {
         b.iter(|| {
             let result = process_files_filtered(test_dir);

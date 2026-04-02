@@ -17,20 +17,20 @@ use std::{
     path::{Path, PathBuf},
 };
 
-#[derive(Default, Debug, Clone, Copy)]
-pub struct PaOptions<'a> {
+#[derive(Default, Debug, Clone)]
+pub struct PaOptions {
     pub font_num: Option<f32>,
     pub be_width: Option<f32>,
     pub be_height: Option<f32>,
-    pub checktype: Option<&'a str>,
-    pub file_path: Option<&'a str>,
+    pub checktype: Option<String>,
+    pub file_path: Option<String>,
 }
 #[derive(Debug)]
 // 使用lightningcss Visitor 来自定义规则
 struct MyVisitor<'a> {
-    pa_option: PaOptions<'a>,
+    pa_option: &'a PaOptions,
 }
-impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
+impl<'i,'a> Visitor<'i> for MyVisitor<'a>  {
     type Error = Infallible;
     fn visit_types(&self) -> VisitTypes {
         // visit_types!(URLS | LENGTHS | RULES) // 添加 RULES 以访问规则
@@ -105,6 +105,8 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
     //处理css px值与自定义函数vh()
     fn visit_token(&mut self, token: &mut TokenOrValue<'i>) -> Result<(), Self::Error> {
         // println!("token_{:?}", token);
+        // println!("token_{:?}", self.pa_option);
+        // let s=self.pa_option.checktype;
         match token {
             TokenOrValue::Length(length) => {
                 if let LengthValue::Px(px) = length {
@@ -112,7 +114,9 @@ impl<'a, 'i> Visitor<'i> for MyVisitor<'a> {
                 }
             }
             TokenOrValue::Function(f)
-                if self.pa_option.checktype.unwrap_or("") == "1" && f.name.0 == "vh" =>
+                // if self.pa_option.checktype.unwrap_or("".to_string()) == "1" && f.name.0 == "vh" =>
+                if self.pa_option.checktype.as_deref() == Some("1") && f.name.0 == "vh" =>
+
             {
                 if let Some(arg) = f.arguments.0.get(0) {
                     if let TokenOrValue::Token(num) = arg {
@@ -244,12 +248,14 @@ impl Error for CSSError {}
 // }
 // 并行操作文件
 pub fn read_file_ra(pa_option: PaOptions) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let file_path = pa_option.file_path.unwrap_or("");
-    let css_files = find_css_files(file_path)?;
+    // let file_path = pa_option.file_path.unwrap_or("");
+    let file_path = pa_option.file_path.as_deref().unwrap_or("");
+        // 限制最大 10 层目录
+    let css_files = find_css_files(&file_path,10)?;
     if css_files.is_empty() {
         return Err(Box::new(CSSError::NoCssFilesFound));
     }
-    let css_unit = match pa_option.checktype.unwrap_or("_") {
+    let css_unit = match pa_option.checktype.as_deref().unwrap_or("_") {
         "0" => "rem",
         "1" => "vw",
         _ => "_",
@@ -283,27 +289,64 @@ fn process_single_file(
     Ok(())
 }
 //提前过滤文件
-fn find_css_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
-    let mut css_files = Vec::new();
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            css_files.extend(find_css_files(path.to_str().unwrap())?);
-        } else if let Some(ext) = path.extension() {
-            if ext.to_str() == Some("css") {
-                let file_name = path
+// fn find_css_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
+//     let mut css_files = Vec::with_capacity(100);
+//     for entry in fs::read_dir(dir)? {
+//         let entry = entry?;
+//         let path = entry.path();
+//         if path.is_dir() {
+//             css_files.extend(find_css_files(path.to_str().unwrap())?);
+//         } else if let Some(ext) = path.extension() {
+//             if ext.to_str() == Some("css") {
+//                 let file_name = path
+//                     .file_stem()
+//                     .and_then(|s| s.to_str())
+//                     .unwrap_or_default();
+//                 if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
+//                     css_files.push(path);
+//                 }
+//             }
+//         }
+//     }
+//     Ok(css_files)
+// }
+
+
+fn find_css_files(dir: &str,max_depth:usize) -> Result<Vec<PathBuf>, std::io::Error> {
+    let mut css_files = Vec::with_capacity(100);
+    fn find_recursive(dir:&Path,max_depth:usize,curr_depth:usize,files:&mut Vec<PathBuf>)->Result<(), std::io::Error>
+    {
+        if curr_depth>max_depth{
+            return Ok(());
+        }
+        for entry in fs::read_dir(dir)?{
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir(){
+                find_recursive(&path,max_depth,curr_depth+1,files)?;
+            }else if let Some(ext) =path.extension(){
+                if ext.to_str() == Some("css"){
+                    let file_name = path
                     .file_stem()
                     .and_then(|s| s.to_str())
                     .unwrap_or_default();
-                if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
-                    css_files.push(path);
+                    if !file_name.ends_with("_conv_rem") && !file_name.ends_with("_conv_vw") {
+                       files.push(path);
+        
+                    }
                 }
             }
         }
+
+        Ok(())
     }
+
+    find_recursive(Path::new(dir),max_depth,1,&mut css_files)?;
     Ok(css_files)
 }
+
+
+
 
 fn unit_analysis_change(
     pa_option: &PaOptions,
@@ -314,7 +357,7 @@ fn unit_analysis_change(
     match StyleSheet::parse(css, ParserOptions::default()) {
         Ok(mut stylesheet) => {
             let mut visitor = MyVisitor {
-                pa_option: *pa_option,
+                pa_option: pa_option,
             };
             stylesheet.visit(&mut visitor).unwrap();
             let targets = Targets {
@@ -334,7 +377,7 @@ fn unit_analysis_change(
                 })
                 .unwrap();
             replaced_css.push_str(&res.code);
-            println!("code_{}", res.code);
+            // println!("code_{}", res.code);
             let escaped = re_escape_private_use(&res.code);
             Ok(escaped)
         }
@@ -350,8 +393,8 @@ fn unit_analysis_change(
     }
 }
 
-fn conditional_px_conversion(px: f32, pa_option: PaOptions) -> LengthValue {
-    let checktype = pa_option.checktype.unwrap_or("");
+fn conditional_px_conversion(px: f32, pa_option: &PaOptions) -> LengthValue {
+    let checktype = pa_option.checktype.as_deref().unwrap_or("");
     let px_val = px.abs();
     if (px_val - 1.0).abs() > f32::EPSILON {
         match checktype {
